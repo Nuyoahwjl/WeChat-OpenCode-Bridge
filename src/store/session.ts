@@ -113,3 +113,39 @@ export function clearSession(sessionId: string, session: Session): void {
     saveSession(sessionId, session);
     logger.info("🗑️ 会话已清空", { sessionId });
 }
+
+export function deleteSessionFile(sessionId: string): boolean {
+    const filePath = sessionFilePath(sessionId);
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            logger.info("🗑️ 本地会话文件已删除", { sessionId });
+            return true;
+        }
+        return false;
+    } catch (err) {
+        logger.error("❌ 删除本地会话文件失败", { sessionId, error: String(err) });
+        return false;
+    }
+}
+
+export function findLocalSessionBySdkId(accountId: string, sdkSessionId: string): string | null {
+    ensureSessionsDir();
+    try {
+        const files = fs.readdirSync(SESSIONS_DIR);
+        for (const file of files) {
+            if (!file.endsWith(".json")) continue;
+            const sessionId = file.slice(0, -5);
+            if (!sessionId.startsWith(accountId)) continue;
+            
+            const handle = loadSession(sessionId);
+            if (handle && handle.session.sdkSessionId === sdkSessionId) {
+                return sessionId;
+            }
+        }
+        return null;
+    } catch (err) {
+        logger.error("❌ 查找本地会话失败", { error: String(err) });
+        return null;
+    }
+}

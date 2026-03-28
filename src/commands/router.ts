@@ -8,6 +8,7 @@ export interface CommandContext {
     getCurrentSessionId?: () => string;
     switchSession?: (sessionId: string) => void;
     renameSession?: (newTitle: string) => Promise<void>;
+    deleteSession?: (sessionTitle: string) => Promise<{ deleted: boolean; wasCurrent: boolean }>;
 }
 
 export interface CommandResult {
@@ -39,6 +40,8 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
             return await handleSwitch(ctx, args);
         case "rename":
             return await handleRename(ctx, args);
+        case "delete":
+            return await handleDelete(ctx, args);
         default:
             return { handled: true, reply: `❌ 未知指令: /${cmd}\n发送 /help 查看可用命令` };
     }
@@ -46,22 +49,15 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help          
-    - 显示帮助信息
-/clear         
-    - 清空当前会话
-/new [标题]    
-    - 创建新的会话
-/rename <标题> 
-    - 重命名当前会话
-/status        
-    - 显示当前状态
-/history [数量] 
-    - 查看聊天历史
-/sessions      
-    - 列出所有会话
-/switch <标题> 
-    - 切换到指定会话`;
+/help          - 显示帮助信息
+/clear         - 清空当前会话
+/new [标题]    - 创建新的会话
+/rename <标题> - 重命名当前会话
+/delete <标题> - 删除指定会话
+/status        - 显示当前状态
+/history [数量] - 查看聊天历史
+/sessions      - 列出所有会话
+/switch <标题> - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
@@ -177,5 +173,33 @@ async function handleRename(ctx: CommandContext, args: string): Promise<CommandR
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return { handled: true, reply: `❌ 重命名会话失败: ${errorMsg}` };
+    }
+}
+
+async function handleDelete(ctx: CommandContext, args: string): Promise<CommandResult> {
+    if (!args) {
+        return { handled: true, reply: "❌ 请提供要删除的会话标题\n用法: /delete <会话标题>" };
+    }
+
+    if (!ctx.deleteSession) {
+        return { handled: true, reply: "❌ 无法删除会话：功能未启用" };
+    }
+
+    try {
+        const sessionTitle = args.trim();
+        const result = await ctx.deleteSession(sessionTitle);
+        
+        if (!result.deleted) {
+            return { handled: true, reply: `❌ 未找到标题包含 "${sessionTitle}" 的会话` };
+        }
+
+        if (result.wasCurrent) {
+            return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}\n⚠️ 当前会话已被删除，请使用 /new 创建新会话` };
+        }
+
+        return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}` };
+    } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return { handled: true, reply: `❌ 删除会话失败: ${errorMsg}` };
     }
 }

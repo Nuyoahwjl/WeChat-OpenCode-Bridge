@@ -119,6 +119,24 @@ export class OpenCodeClient {
         logger.info("✅ 会话已重命名", { sessionId, title });
     }
 
+    async deleteSession(sessionId: string): Promise<void> {
+        logger.info("🗑️ 删除 OpenCode 会话", { sessionId });
+        const url = `${this.baseUrl}/session/${sessionId}`;
+
+        const res = await fetch(url, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            logger.error("❌ 会话删除失败", { status: res.status, body: text });
+            throw new Error(`Failed to delete session: ${res.status} - ${text}`);
+        }
+
+        logger.info("✅ 会话已删除", { sessionId });
+    }
+
     async sendMessage(
         sessionId: string,
         parts: any[],

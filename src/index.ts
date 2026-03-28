@@ -11,6 +11,8 @@ import {
     addChatMessage,
     clearSession,
     getChatHistoryText,
+    deleteSessionFile,
+    findLocalSessionBySdkId,
     type SessionHandle,
     type Session as LocalSession,
 } from "./store/session.js";
@@ -173,6 +175,39 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 await ctx.opencode.renameSession(sdkSessionId, fullTitle);
                 logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, fullTitle });
             },
+            deleteSession: async (sessionTitle: string) => {
+                // Find session by title
+                const sessions = await ctx.opencode.listSessions();
+                const targetTitle = sessionTitle.trim().toLowerCase();
+                
+                const matchedSession = sessions.find(s =>
+                    (s.title || "").toLowerCase().includes(targetTitle)
+                );
+                
+                if (!matchedSession) {
+                    return { deleted: false, wasCurrent: false };
+                }
+                
+                const currentSdkSessionId = handle.session.sdkSessionId;
+                const isCurrent = matchedSession.id === currentSdkSessionId;
+                
+                // Delete from OpenCode
+                await ctx.opencode.deleteSession(matchedSession.id);
+                
+                // Delete local session file if exists
+                const localSessionId = findLocalSessionBySdkId(ctx.account.accountId, matchedSession.id);
+                if (localSessionId) {
+                    deleteSessionFile(localSessionId);
+                }
+                
+                logger.info("🗑️ 会话已删除", { 
+                    sdkSession: matchedSession.id, 
+                    title: matchedSession.title,
+                    wasCurrent: isCurrent 
+                });
+                
+                return { deleted: true, wasCurrent: isCurrent };
+            },
         };
         const result = await routeCommand(cmdCtx);
         if (result.handled && result.reply) {
@@ -182,6 +217,12 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
         if (result.handled) {
             return;
         }
+    }
+
+    // Check if current session has been deleted
+    if (!session.sdkSessionId) {
+        await sendReply(ctx.account, fromUserId, contextToken, "⚠️ 当前会话已被删除，请使用 /new 创建新会话");
+        return;
     }
 
     session.state = "processing";
