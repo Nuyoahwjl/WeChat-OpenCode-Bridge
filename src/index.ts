@@ -169,8 +169,9 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 if (!sdkSessionId) {
                     throw new Error("当前会话未关联 OpenCode 会话");
                 }
-                await ctx.opencode.renameSession(sdkSessionId, newTitle);
-                logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, newTitle });
+                const fullTitle = `WeChat: ${newTitle}`;
+                await ctx.opencode.renameSession(sdkSessionId, fullTitle);
+                logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, fullTitle });
             },
         };
         const result = await routeCommand(cmdCtx);

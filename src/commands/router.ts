@@ -46,14 +46,22 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help          - 显示帮助信息
-/clear         - 清空当前会话
-/new [标题]    - 创建新的会话
-/rename <标题> - 重命名当前会话
-/status        - 显示当前状态
-/history [数量] - 查看聊天历史
-/sessions      - 列出所有会话
-/switch <标题> - 切换到指定会话`;
+/help          
+    - 显示帮助信息
+/clear         
+    - 清空当前会话
+/new [标题]    
+    - 创建新的会话
+/rename <标题> 
+    - 重命名当前会话
+/status        
+    - 显示当前状态
+/history [数量] 
+    - 查看聊天历史
+/sessions      
+    - 列出所有会话
+/switch <标题> 
+    - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
@@ -165,7 +173,7 @@ async function handleRename(ctx: CommandContext, args: string): Promise<CommandR
     try {
         const newTitle = args.trim();
         await ctx.renameSession(newTitle);
-        return { handled: true, reply: `✅ 会话已重命名为: ${newTitle}` };
+        return { handled: true, reply: `✅ 会话已重命名为: WeChat: ${newTitle}` };
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return { handled: true, reply: `❌ 重命名会话失败: ${errorMsg}` };
