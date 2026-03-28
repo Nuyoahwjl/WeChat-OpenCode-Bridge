@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeChat-OpenCode-Bridge</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e12'/><circle cx='35' cy='35' r='8' fill='%2307c160'/><circle cx='65' cy='35' r='8' fill='%2307c160'/><rect x='30' y='50' width='40' height='25' rx='4' fill='%2307c160' opacity='0.8'/><rect x='25' y='20' width='50' height='35' rx='6' fill='none' stroke='%2307c160' stroke-width='2'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Fira+Code:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --green: #07C160;
+      --green-dim: #059949;
+      --green-glow: rgba(7, 193, 96, 0.18);
+      --bg: #0a0e12;
+      --bg2: #0e1318;
+      --bg3: #141b22;
+      --border: rgba(7, 193, 96, 0.18);
+      --text: #e8f0e8;
+      --muted: #7a9088;
+      --accent: #1aff88;
+      --gold: #f7c873;
+      --blue: #7bbfea;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise overlay ──────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Grid lines ─────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(7, 193, 96, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(7, 193, 96, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    section,
+    header,
+    nav,
+    footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── NAV ────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(10, 14, 18, 0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: var(--green);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span {
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--green);
+    }
+
+    .nav-cta {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--bg);
+      background: var(--green);
+      padding: 8px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── HERO ───────────────────────────────────────── */
+    header {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Radial glow */
+    header::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(7, 193, 96, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      border: 1px solid var(--border);
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 32px;
+      background: rgba(7, 193, 96, 0.06);
+      animation: fadeSlideDown 0.7s ease both;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      animation: fadeSlideDown 0.7s 0.1s ease both;
+    }
+
+    .hero-title .wechat {
+      color: var(--green);
+    }
+
+    .hero-title .bridge {
+      color: var(--text);
+    }
+
+    .hero-title .opencode {
+      background: linear-gradient(90deg, var(--gold), #ff9a4a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 48px;
+      animation: fadeSlideDown 0.7s 0.2s ease both;
+    }
+
+    .hero-sub strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeSlideDown 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0a0e12;
+      background: var(--green);
+      border: none;
+      padding: 14px 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 24px rgba(7, 193, 96, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(7, 193, 96, 0.5);
+    }
+
+    .btn-ghost {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 14px 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      color: var(--green);
+      transform: translateY(-2px);
+    }
+
+    /* Badges */
+    .tech-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 56px;
+      animation: fadeSlideDown 0.7s 0.45s ease both;
+    }
+
+    .badge {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      padding: 5px 14px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+
+    .badge-ts {
+      color: #3178c6;
+      border-color: #3178c620;
+      background: #3178c610;
+    }
+
+    .badge-node {
+      color: #68a063;
+      border-color: #68a06320;
+      background: #68a06310;
+    }
+
+    .badge-npm {
+      color: #cb3837;
+      border-color: #cb383720;
+      background: #cb383710;
+    }
+
+    .badge-mit {
+      color: var(--gold);
+      border-color: #f7c87320;
+      background: #f7c87310;
+    }
+
+    /* ── TERMINAL DEMO ──────────────────────────────── */
+    .terminal-wrap {
+      max-width: 900px;
+      width: 100%;
+      margin: 72px auto 0;
+      animation: fadeSlideDown 0.7s 0.55s ease both;
+    }
+
+    .terminal {
+      background: #0c1117;
+      border: 1px solid rgba(7, 193, 96, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(7, 193, 96, 0.08);
+    }
+
+    .terminal-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #111820;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .t-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .t-dot.r {
+      background: #ff5f57;
+    }
+
+    .t-dot.y {
+      background: #febc2e;
+    }
+
+    .t-dot.g {
+      background: #28c840;
+    }
+
+    .t-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0 auto;
+    }
+
+    .terminal-body {
+      padding: 24px 28px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.9;
+    }
+
+    .t-prompt {
+      color: var(--green);
+    }
+
+    .t-cmd {
+      color: var(--text);
+    }
+
+    .t-output {
+      color: var(--muted);
+      padding-left: 4px;
+    }
+
+    .t-success {
+      color: var(--green);
+    }
+
+    .t-info {
+      color: var(--blue);
+    }
+
+    .t-warn {
+      color: var(--gold);
+    }
+
+    .t-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--green);
+      vertical-align: middle;
+      margin-left: 2px;
+      animation: blink 1.1s step-end infinite;
+    }
+
+    /* ── ARCHITECTURE ───────────────────────────────── */
+    .section {
+      padding: 100px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--green);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 560px;
+      margin-bottom: 64px;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 0 auto;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 28px 24px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-width: 150px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .flow-node:hover {
+      border-color: var(--green);
+      transform: translateY(-4px);
+    }
+
+    .flow-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .flow-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .flow-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 0 12px;
+    }
+
+    .arrow-line {
+      width: 48px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      position: relative;
+    }
+
+    .arrow-line::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid var(--green);
+    }
+
+    .arrow-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+    }
+
+    /* ── FEATURES ───────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 32px;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--green);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border);
+      transform: translateY(-4px);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── COMMANDS ───────────────────────────────────── */
+    .commands-section {
+      padding: 100px 24px;
+      background: var(--bg2);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .commands-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .cmd-table th {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: left;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .cmd-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .cmd-table tr:hover td {
+      background: rgba(7, 193, 96, 0.04);
+    }
+
+    .cmd-code {
+      font-family: 'Fira Code', monospace;
+      color: var(--green);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .cmd-desc {
+      color: var(--muted);
+    }
+
+    .cmd-example {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--blue);
+    }
+
+    /* ── SETUP STEPS ────────────────────────────────── */
+    /* ── ARCH DIAGRAM ───────────────────────────────── */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .arch-top-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .arch-bridge {
+      border-color: rgba(7, 193, 96, 0.45) !important;
+      background: rgba(7, 193, 96, 0.06) !important;
+      box-shadow: 0 0 32px rgba(7, 193, 96, 0.1);
+    }
+
+    .arch-wechat {
+      border-color: rgba(123, 191, 234, 0.35) !important;
+    }
+
+    .arch-opencode {
+      border-color: rgba(247, 200, 115, 0.35) !important;
+    }
+
+    .arch-storage {
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      background: rgba(255, 255, 255, 0.02) !important;
+      min-width: 220px;
+    }
+
+    .arch-bidir-h {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 8px;
+      min-width: 100px;
+    }
+
+    .arch-arrow-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+      margin: 10px 0;
+    }
+
+    .arch-line {
+      flex: 1;
+      height: 2px;
+    }
+
+    .arch-line-green {
+      background: var(--green);
+    }
+
+    .arch-line-blue {
+      background: var(--blue);
+    }
+
+    .arch-line-gold {
+      background: var(--gold);
+    }
+
+    .arch-arrowhead {
+      font-size: 0.65rem;
+      line-height: 1;
+    }
+
+    .arch-arrowhead-left {
+      color: var(--green);
+    }
+
+    .arch-arrowhead-right {
+      color: var(--blue);
+    }
+
+    .arch-arrow-label-top,
+    .arch-arrow-label-bot {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.58rem;
+      white-space: nowrap;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .arch-arrow-label-top {
+      top: -15px;
+      color: var(--green);
+    }
+
+    .arch-arrow-label-bot {
+      bottom: -15px;
+      color: var(--blue);
+    }
+
+    .arch-down-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .arch-vline {
+      width: 2px;
+      height: 36px;
+      background: var(--muted);
+    }
+
+    .arch-vline-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
+      margin: 3px 0;
+    }
+
+    .arch-arrowhead-down {
+      font-size: 0.65rem;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .arch-bottom-row {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ── STEPS (vertical) ───────────────────────────── */
+    .steps-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 720px;
+    }
+
+    .step-card {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 32px 0 32px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .step-card:last-child {
+      border-bottom: none;
+    }
+
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      width: 56px;
+    }
+
+    .step-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      background: rgba(7, 193, 96, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--green);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-connector {
+      width: 2px;
+      flex: 1;
+      min-height: 32px;
+      background: linear-gradient(180deg, var(--green), rgba(7, 193, 96, 0.1));
+      margin-top: 4px;
+    }
+
+    .step-card:last-child .step-connector {
+      display: none;
+    }
+
+    .step-body {
+      flex: 1;
+      padding-top: 10px;
+    }
+
+    .step-num {
+      display: none;
+    }
+
+    .step-icon {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .step-code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--green);
+      background: rgba(7, 193, 96, 0.07);
+      border: 1px solid rgba(7, 193, 96, 0.15);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: block;
+      word-break: break-all;
+    }
+
+    /* ── FILE TREE ──────────────────────────────────── */
+    .file-tree {
+      background: #0c1117;
+      border: 1px solid rgba(7, 193, 96, 0.15);
+      border-radius: 12px;
+      padding: 28px 32px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 2;
+      max-width: 520px;
+    }
+
+    .ft-dir {
+      color: var(--blue);
+    }
+
+    .ft-file {
+      color: var(--text);
+    }
+
+    .ft-com {
+      color: var(--muted);
+    }
+
+    .ft-root {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .split-layout {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        padding: 14px 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .flow {
+        gap: 8px;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+    }
+
+    /* ── FOOTER ─────────────────────────────────────── */
+    footer {
+      padding: 60px 24px 40px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .footer-logo .g {
+      color: var(--green);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .footer-links a {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--green);
+    }
+
+    .footer-copy {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ── Divider ────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── ANIMATIONS ─────────────────────────────────── */
+    @keyframes fadeSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(7, 193, 96, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(7, 193, 96, 0);
+      }
+    }
+
+    /* ── Scroll reveal ──────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Glow separator ────────────────────────────── */
+    .glow-bar {
+      width: 56px;
+      height: 3px;
+      background: var(--green);
+      border-radius: 2px;
+      margin-bottom: 40px;
+      box-shadow: 0 0 12px rgba(7, 193, 96, 0.5);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo"><span>~/</span>WeChat-OpenCode-Bridge</div>
+    <ul class="nav-links">
+      <li><a href="#features">功能</a></li>
+      <li><a href="#architecture">架构</a></li>
+      <li><a href="#commands">指令</a></li>
+      <li><a href="#setup">使用</a></li>
+    </ul>
+    <a class="nav-cta" href="https://github.com/Nuyoahwjl/WeChat-OpenCode-Bridge" target="_blank">GitHub →</a>
+  </nav>
+
+  <!-- HERO -->
+  <header>
+
+    <h1 class="hero-title">
+      <span class="wechat">微信</span><span class="bridge"> × </span><span class="opencode">OpenCode</span><br />
+      <span class="bridge">Bridge</span>
+    </h1>
+
+    <p class="hero-sub">
+      将<strong>微信个人账号</strong>连接到 <strong>OpenCode AI</strong>，<br />
+      在聊天窗口中直接与 AI 对话、管理会话、执行指令。
+    </p>
+
+    <div class="hero-buttons">
+      <a class="btn-primary" href="https://github.com/Nuyoahwjl/WeChat-OpenCode-Bridge" target="_blank">⭐ 查看源码</a>
+      <a class="btn-ghost" href="#setup">快速开始 →</a>
+    </div>
+
+    <div class="tech-badges">
+      <span class="badge badge-ts">TypeScript 5.9.3</span>
+      <span class="badge badge-node">Node.js 24+</span>
+      <span class="badge badge-npm">npm 11+</span>
+      <span class="badge badge-mit">MIT License</span>
+    </div>
+
+    <!-- Terminal demo -->
+    <div class="terminal-wrap">
+      <div class="terminal">
+        <div class="terminal-titlebar">
+          <span class="t-dot r"></span>
+          <span class="t-dot y"></span>
+          <span class="t-dot g"></span>
+          <span class="t-title">WeChat-OpenCode-Bridge — bash</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$ </span><span class="t-cmd">npm run setup</span></div>
+          <div class="t-success">✓ 请用微信扫描以下二维码</div>
+          <div class="t-output">▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒</div>
+          <div class="t-output">▒ ████ ██ ██ ████ ▒</div>
+          <div class="t-output">▒ █ █ ████ █ █ ▒</div>
+          <div class="t-output">▒ ████ ██ ████ ▒</div>
+          <div class="t-output">▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒</div>
+          <div class="t-success">✓ 绑定成功！账号已保存</div>
+          <br />
+          <div><span class="t-prompt">$ </span><span class="t-cmd">npm run start</span></div>
+          <div class="t-info">ℹ 桥接服务已启动，监听微信消息...</div>
+          <div class="t-success">✓ 已连接到 OpenCode Server (localhost:4096)</div>
+          <div class="t-output">— 等待消息中 <span class="t-cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FEATURES -->
+  <section class="section reveal" id="features">
+    <div class="section-label">// core features</div>
+    <h2 class="section-title">核心功能</h2>
+    <div class="glow-bar"></div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div class="feature-name">无缝桥接</div>
+        <p class="feature-desc">通过 WeChat ilink API 连接个人账号，长轮询实时监听消息，实现与 OpenCode AI 的双向通信。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div class="feature-name">AI 自动回复</div>
+        <p class="feature-desc">发送任意消息，AI 自动调用 OpenCode REST API 生成回复，支持流式输出，响应快速自然。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-name">多会话管理</div>
+        <p class="feature-desc">创建、重命名、删除、切换会话，聊天历史本地持久化存储，随时恢复上下文。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-name">扫码极速绑定</div>
+        <p class="feature-desc">首次绑定只需在终端中用微信扫描二维码，凭证本地安全保存，后续自动登录。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-name">斜杠指令系统</div>
+        <p class="feature-desc">内置 7 种斜杠指令路由，通过微信消息即可管理会话、查看历史、获取帮助，完全无需额外 UI。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-name">健壮的错误处理</div>
+        <p class="feature-desc">内置 fetch 重试机制、超时保护、结构化日志、会话状态追踪（idle/processing），稳定可靠运行。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="section reveal" id="architecture">
+    <div class="section-label">// architecture</div>
+    <h2 class="section-title">系统架构</h2>
+    <div class="glow-bar"></div>
+    <p class="section-desc">整体架构分为四层，消息在微信客户端、桥接服务、OpenCode Server 与本地存储之间流转。</p>
+
+    <!-- Flow Diagram -->
+    <div class="arch-diagram" style="margin-bottom: 80px;">
+      <!-- Top row: 微信 ←→ Bridge ←→ OpenCode -->
+      <div class="arch-top-row">
+        <!-- 微信 node -->
+        <div class="flow-node arch-wechat">
+          <div class="flow-icon">📱</div>
+          <div class="flow-label">微信客户端</div>
+          <div class="flow-sub">WeChat ilink API</div>
+        </div>
+
+        <!-- 微信 ↔ Bridge arrows -->
+        <div class="arch-bidir-h">
+          <div class="arch-arrow-row">
+            <div class="arch-arrowhead arch-arrowhead-left">◀</div>
+            <div class="arch-line arch-line-green"></div>
+            <div class="arch-arrow-label-top">消息 / 回复</div>
+          </div>
+          <div class="arch-arrow-row" style="margin-top: 6px;">
+            <div class="arch-arrow-label-bot">消息 / 指令</div>
+            <div class="arch-line arch-line-blue"></div>
+            <div class="arch-arrowhead arch-arrowhead-right">▶</div>
+          </div>
+        </div>
+
+        <!-- Bridge node (center) -->
+        <div class="flow-node arch-bridge">
+          <div class="flow-icon">⚙️</div>
+          <div class="flow-label">Bridge Server</div>
+          <div class="flow-sub">Node.js / TypeScript</div>
+        </div>
+
+        <!-- Bridge ↔ OpenCode arrows -->
+        <div class="arch-bidir-h">
+          <div class="arch-arrow-row">
+            <div class="arch-arrow-label-top">API 请求</div>
+            <div class="arch-line arch-line-gold"></div>
+            <div class="arch-arrowhead arch-arrowhead-right" style="color: var(--gold);">▶</div>
+          </div>
+          <div class="arch-arrow-row" style="margin-top: 6px;">
+            <div class="arch-arrowhead arch-arrowhead-left" style="color: var(--gold);">◀</div>
+            <div class="arch-line arch-line-gold"></div>
+            <div class="arch-arrow-label-bot">OpenCode 回复</div>
+          </div>
+        </div>
+
+        <!-- OpenCode node -->
+        <div class="flow-node arch-opencode">
+          <div class="flow-icon">🤖</div>
+          <div class="flow-label">OpenCode Server</div>
+          <div class="flow-sub">localhost:4096</div>
+        </div>
+      </div>
+
+      <!-- Down arrow: Bridge → 本地存储 -->
+      <div class="arch-down-col">
+        <div class="arch-vline"></div>
+        <div class="arch-vline-label">读写</div>
+        <div class="arch-arrowhead-down">▼</div>
+      </div>
+
+      <!-- Storage node -->
+      <div class="arch-bottom-row">
+        <div class="flow-node arch-storage">
+          <div class="flow-icon">💾</div>
+          <div class="flow-label">本地存储</div>
+          <div class="flow-sub">~/.WeChat-OpenCode-Bridge/</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split: file tree + desc -->
+    <div class="split-layout">
+      <div class="file-tree">
+        <div class="ft-root">WeChat-OpenCode-Bridge/</div>
+        <div>├── <span class="ft-dir">src/</span></div>
+        <div>│ ├── <span class="ft-file">index.ts</span> <span class="ft-com"># CLI 入口</span></div>
+        <div>│ ├── <span class="ft-file">logger.ts</span> <span class="ft-com"># 结构化日志</span></div>
+        <div>│ ├── <span class="ft-file">constants.ts</span> <span class="ft-com"># 共享常量</span></div>
+        <div>│ ├── <span class="ft-file">config.ts</span> <span class="ft-com"># 配置加载/保存</span></div>
+        <div>│ ├── <span class="ft-dir">commands/</span></div>
+        <div>│ │ └── <span class="ft-file">router.ts</span> <span class="ft-com"># 指令路由</span></div>
+        <div>│ ├── <span class="ft-dir">opencode/</span></div>
+        <div>│ │ └── <span class="ft-file">client.ts</span> <span class="ft-com"># REST 客户端</span></div>
+        <div>│ ├── <span class="ft-dir">store/</span></div>
+        <div>│ │ ├── <span class="ft-file">account.ts</span> <span class="ft-com"># 账号持久化</span></div>
+        <div>│ │ └── <span class="ft-file">session.ts</span> <span class="ft-com"># 会话持久化</span></div>
+        <div>│ └── <span class="ft-dir">wechat/</span></div>
+        <div>│ ├── <span class="ft-file">api.ts</span> <span class="ft-com"># WeChat 客户端</span></div>
+        <div>│ ├── <span class="ft-file">login.ts</span> <span class="ft-com"># 二维码登录</span></div>
+        <div>│ └── <span class="ft-file">monitor.ts</span> <span class="ft-com"># 长轮询监听</span></div>
+        <div>├── <span class="ft-file">package.json</span></div>
+        <div>└── <span class="ft-file">tsconfig.json</span></div>
+      </div>
+
+      <div>
+        <div style="margin-bottom: 32px;">
+          <div
+            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--green);">
+            🔌 wechat/ 模块</div>
+          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">通过 WeChat ilink API 实现二维码登录、消息接收与发送，内置
+            fetch 包装器提供重试与超时保护，长轮询监听器保持消息实时推送。</p>
+        </div>
+        <div style="margin-bottom: 32px;">
+          <div
+            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--gold);">
+            🤖 opencode/ 模块</div>
+          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">封装 OpenCode REST API
+            客户端，负责会话的创建、查询、删除与消息发送，对接本地运行的 <code
+              style="font-family: Fira Code; color: var(--text);">opencode serve</code> 服务。</p>
+        </div>
+        <div style="margin-bottom: 32px;">
+          <div
+            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--blue);">
+            💾 store/ 模块</div>
+          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">账号凭证与会话数据持久化，JSON
+            文件存储于用户主目录下，聊天历史本地备份，会话状态追踪（idle / processing）。</p>
+        </div>
+        <div>
+          <div
+            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text);">
+            ⚡ commands/ 路由</div>
+          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">斜杠指令解析与分发，将微信消息中的 /help、/new、/switch
+            等指令路由到对应处理函数，支持模糊匹配与参数解析。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- COMMANDS -->
+  <div class="commands-section reveal" id="commands">
+    <div class="commands-inner">
+      <div class="section-label">// slash commands</div>
+      <h2 class="section-title">微信快捷指令</h2>
+      <div class="glow-bar"></div>
+      <p class="section-desc" style="margin-bottom: 40px;">在微信中发送以下指令，即可完整管理 OpenCode 会话，无需任何额外界面。</p>
+
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>指令</th>
+            <th>说明</th>
+            <th>示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cmd-code">/help</span></td>
+            <td class="cmd-desc">显示所有可用指令的帮助信息</td>
+            <td><span class="cmd-example">/help</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/new [标题]</span></td>
+            <td class="cmd-desc">创建新会话，有参数则以标题命名，无参数使用时间戳</td>
+            <td><span class="cmd-example">/new 我的项目</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/rename &lt;标题&gt;</span></td>
+            <td class="cmd-desc">重命名当前会话，自动添加 WeChat: 前缀</td>
+            <td><span class="cmd-example">/rename 新名字</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/delete [标题]</span></td>
+            <td class="cmd-desc">删除指定会话（含关键词匹配），无参数则删除当前会话</td>
+            <td><span class="cmd-example">/delete 项目</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/history [数量]</span></td>
+            <td class="cmd-desc">查看聊天历史，默认最近 20 条</td>
+            <td><span class="cmd-example">/history 10</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/sessions</span></td>
+            <td class="cmd-desc">列出 OpenCode 服务器上所有会话，显示 ID、时间与当前标记</td>
+            <td><span class="cmd-example">/sessions</span></td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">/switch &lt;标题&gt;</span></td>
+            <td class="cmd-desc">模糊匹配并切换会话，自动恢复本地历史记录</td>
+            <td><span class="cmd-example">/switch 项目</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <section class="section reveal" id="setup">
+    <div class="section-label">// quick start</div>
+    <h2 class="section-title">五步快速上手</h2>
+    <div class="glow-bar"></div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-left">
+          <div class="step-circle">01</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-icon">📦</div>
+          <div class="step-title">克隆仓库</div>
+          <p class="step-desc">将项目克隆到本地并进入目录。</p>
+          <code class="step-code">git clone https://github.com/Nuyoahwjl/WeChat-OpenCode-Bridge</code>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-left">
+          <div class="step-circle">02</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-icon">⚙️</div>
+          <div class="step-title">安装依赖</div>
+          <p class="step-desc">安装完成后自动编译 TypeScript。</p>
+          <code class="step-code">npm install</code>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-left">
+          <div class="step-circle">03</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-icon">📱</div>
+          <div class="step-title">绑定微信</div>
+          <p class="step-desc">首次使用，扫码完成账号绑定，凭证自动保存。</p>
+          <code class="step-code">npm run setup</code>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-left">
+          <div class="step-circle">04</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-icon">🤖</div>
+          <div class="step-title">启动 OpenCode</div>
+          <p class="step-desc">在你的工作目录下启动 OpenCode 服务。</p>
+          <code class="step-code">opencode serve</code>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-left">
+          <div class="step-circle">05</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-icon">🚀</div>
+          <div class="step-title">启动桥接</div>
+          <p class="step-desc">回到仓库目录，启动桥接服务，开始对话！</p>
+          <code class="step-code">npm run start</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- npm scripts table -->
+    <div style="margin-top: 60px;">
+      <div class="section-label" style="margin-bottom: 20px;">// npm scripts</div>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>命令</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cmd-code">npm run setup</span></td>
+            <td class="cmd-desc">扫码绑定微信（首次使用）</td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">npm run start</span></td>
+            <td class="cmd-desc">启动桥接服务</td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">npm run dev</span></td>
+            <td class="cmd-desc">开发模式（代码变更自动重新编译）</td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">npm run build</span></td>
+            <td class="cmd-desc">手动编译 TypeScript</td>
+          </tr>
+          <tr>
+            <td><span class="cmd-code">npm run status</span></td>
+            <td class="cmd-desc">显示当前绑定账号和会话状态</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo"><span class="g">WeChat</span> × OpenCode <span class="g">Bridge</span></div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/Nuyoahwjl/WeChat-OpenCode-Bridge" target="_blank">GitHub</a></li>
+      <li><a href="https://opencode.ai/docs/zh-cn/sdk" target="_blank">OpenCode Docs</a></li>
+      <li><a href="https://github.com/Nuyoahwjl/WeChat-OpenCode-Bridge/blob/master/AGENTS.md" target="_blank">开发者文档</a>
+      </li>
+    </ul>
+    <p class="footer-copy">MIT License · Built by <a href="https://github.com/Nuyoahwjl" target="_blank"
+        style="color: var(--green); text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--green)'">Nuyoahwjl</a></p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+
+</html>
