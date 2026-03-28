@@ -121,9 +121,6 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 Object.assign(session, partial);
                 saveSession(handle.sessionId, session);
             },
-            clearSession: () => {
-                clearSession(handle.sessionId, session);
-            },
             newSession: async (customTitle?: string) => {
                 const newHandle = createSession(ctx.account.accountId);
                 const title = customTitle ? `WeChat: ${customTitle}` : generateTitle();
@@ -145,6 +142,10 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
             },
             getCurrentSessionId: () => {
                 return handle.session.sdkSessionId || "";
+            },
+            getCurrentSessionTitle: () => {
+                // Get current session title from OpenCode
+                return "";
             },
             switchSession: (sdkSessionId: string) => {
                 // Find existing local session by SDK session ID
@@ -179,14 +180,23 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 await ctx.opencode.renameSession(sdkSessionId, fullTitle);
                 logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, fullTitle });
             },
-            deleteSession: async (sessionTitle: string) => {
-                // Find session by exact title match
+            deleteSession: async (sessionTitle?: string) => {
                 const sessions = await ctx.opencode.listSessions();
-                const targetTitle = sessionTitle.trim();
+                let matchedSession;
                 
-                const matchedSession = sessions.find(s =>
-                    (s.title || "") === targetTitle
-                );
+                if (sessionTitle) {
+                    // Find session by exact title match
+                    const targetTitle = sessionTitle.trim();
+                    matchedSession = sessions.find(s =>
+                        (s.title || "") === targetTitle
+                    );
+                } else {
+                    // Delete current session
+                    const currentSdkSessionId = handle.session.sdkSessionId;
+                    if (currentSdkSessionId) {
+                        matchedSession = sessions.find(s => s.id === currentSdkSessionId);
+                    }
+                }
                 
                 if (!matchedSession) {
                     return { deleted: false, wasCurrent: false };
@@ -202,6 +212,12 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 const localSessionId = findLocalSessionBySdkId(ctx.account.accountId, matchedSession.id);
                 if (localSessionId) {
                     deleteSessionFile(localSessionId);
+                }
+                
+                // Clear current session if it was deleted
+                if (isCurrent) {
+                    handle.session.sdkSessionId = undefined;
+                    saveSession(handle.sessionId, handle.session);
                 }
                 
                 logger.info("🗑️ 会话已删除", { 

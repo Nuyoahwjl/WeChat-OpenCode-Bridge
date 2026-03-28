@@ -1,14 +1,14 @@
 export interface CommandContext {
     text: string;
     updateSession: (partial: any) => void;
-    clearSession: () => void;
     newSession: (title?: string) => Promise<void>;
     getChatHistoryText: (limit?: number) => string;
     listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
     getCurrentSessionId?: () => string;
+    getCurrentSessionTitle?: () => string;
     switchSession?: (sessionId: string) => void;
     renameSession?: (newTitle: string) => Promise<void>;
-    deleteSession?: (sessionTitle: string) => Promise<{ deleted: boolean; wasCurrent: boolean }>;
+    deleteSession?: (sessionTitle?: string) => Promise<{ deleted: boolean; wasCurrent: boolean }>;
 }
 
 export interface CommandResult {
@@ -26,8 +26,6 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
     switch (cmd) {
         case "help":
             return handleHelp();
-        case "clear":
-            return handleClear(ctx);
         case "new":
             return handleNew(ctx, args);
         case "history":
@@ -49,14 +47,12 @@ function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
 /help          
     - 显示帮助信息
-/clear         
-    - 清空当前会话
 /new [标题]    
     - 创建新的会话
 /rename <标题> 
     - 重命名当前会话
-/delete <标题> 
-    - 删除指定会话
+/delete [标题] 
+    - 删除指定会话（无参数则删除当前会话）
 /history [数量] 
     - 查看聊天历史
 /sessions      
@@ -64,11 +60,6 @@ function handleHelp(): CommandResult {
 /switch <标题> 
     - 切换到指定会话`;
     return { handled: true, reply: help };
-}
-
-function handleClear(ctx: CommandContext): CommandResult {
-    ctx.clearSession();
-    return { handled: true, reply: "✅ 当前会话已清空" };
 }
 
 async function handleNew(ctx: CommandContext, args: string): Promise<CommandResult> {
@@ -178,27 +169,27 @@ async function handleRename(ctx: CommandContext, args: string): Promise<CommandR
 }
 
 async function handleDelete(ctx: CommandContext, args: string): Promise<CommandResult> {
-    if (!args) {
-        return { handled: true, reply: "❌ 请提供要删除的会话标题\n用法: /delete <会话标题>" };
-    }
-
     if (!ctx.deleteSession) {
         return { handled: true, reply: "❌ 无法删除会话：功能未启用" };
     }
 
     try {
-        const sessionTitle = args.trim();
+        const sessionTitle = args.trim() || undefined;
         const result = await ctx.deleteSession(sessionTitle);
 
         if (!result.deleted) {
-            return { handled: true, reply: `❌ 未找到标题为 "${sessionTitle}" 的会话` };
+            if (sessionTitle) {
+                return { handled: true, reply: `❌ 未找到标题为 "${sessionTitle}" 的会话` };
+            }
+            return { handled: true, reply: "❌ 无法删除当前会话" };
         }
 
+        const deletedName = sessionTitle || ctx.getCurrentSessionTitle?.() || "当前会话";
         if (result.wasCurrent) {
-            return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话` };
+            return { handled: true, reply: `✅ 已删除会话: ${deletedName}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话` };
         }
 
-        return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}` };
+        return { handled: true, reply: `✅ 已删除会话: ${deletedName}` };
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return { handled: true, reply: `❌ 删除会话失败: ${errorMsg}` };
