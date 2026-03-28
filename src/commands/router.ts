@@ -37,19 +37,26 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
         case "switch":
             return await handleSwitch(ctx, args);
         default:
-            return { handled: false };
+            return { handled: true, reply: `❌ 未知指令: /${cmd}\n发送 /help 查看可用命令` };
     }
 }
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help          - 显示帮助信息
-/clear         - 清空历史记录
-/new [标题]    - 创建新的会话
-/status        - 显示当前状态
-/history [num] - 查看聊天历史
-/sessions      - 列出所有会话
-/switch <标题> - 切换到指定会话`;
+/help          
+    - 显示帮助信息
+/clear         
+    - 清空历史记录
+/new [标题]    
+    - 创建新的会话
+/status        
+    - 显示当前状态
+/history [num] 
+    - 查看聊天历史
+/sessions      
+    - 列出所有会话
+/switch <标题> 
+    - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
@@ -104,8 +111,8 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
             const title = session.title || "未命名会话";
             const created = formatTime(session.created);
             const isCurrent = session.id === currentSessionId;
-            const marker = isCurrent ? " ✅ (当前会话)" : "";
-            reply += `${index + 1}. ${title}\n`;
+            const marker = isCurrent ? "✅ (当前会话)" : "";
+            reply += `${index + 1}.${title}\n`;
             reply += `   ID: ${session.id.substring(0, 12)}...\n`;
             reply += `   创建: ${created}\n`;
             reply += `   ${marker}\n\n`;
