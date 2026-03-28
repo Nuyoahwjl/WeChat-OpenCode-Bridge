@@ -100,6 +100,25 @@ export class OpenCodeClient {
         return data.id;
     }
 
+    async renameSession(sessionId: string, title: string): Promise<void> {
+        logger.info("✏️ 重命名 OpenCode 会话", { sessionId, title });
+        const url = `${this.baseUrl}/session/${sessionId}`;
+
+        const res = await fetch(url, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title }),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            logger.error("❌ 会话重命名失败", { status: res.status, body: text });
+            throw new Error(`Failed to rename session: ${res.status} - ${text}`);
+        }
+
+        logger.info("✅ 会话已重命名", { sessionId, title });
+    }
+
     async sendMessage(
         sessionId: string,
         parts: any[],

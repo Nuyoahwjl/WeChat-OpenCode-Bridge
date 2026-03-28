@@ -7,6 +7,7 @@ export interface CommandContext {
     listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
     getCurrentSessionId?: () => string;
     switchSession?: (sessionId: string) => void;
+    renameSession?: (newTitle: string) => Promise<void>;
 }
 
 export interface CommandResult {
@@ -36,6 +37,8 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
             return await handleSessions(ctx);
         case "switch":
             return await handleSwitch(ctx, args);
+        case "rename":
+            return await handleRename(ctx, args);
         default:
             return { handled: true, reply: `❌ 未知指令: /${cmd}\n发送 /help 查看可用命令` };
     }
@@ -43,26 +46,20 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help          
-    - 显示帮助信息
-/clear         
-    - 清空历史记录
-/new [标题]    
-    - 创建新的会话
-/status        
-    - 显示当前状态
-/history [num] 
-    - 查看聊天历史
-/sessions      
-    - 列出所有会话
-/switch <标题> 
-    - 切换到指定会话`;
+/help          - 显示帮助信息
+/clear         - 清空当前会话
+/new [标题]    - 创建新的会话
+/rename <标题> - 重命名当前会话
+/status        - 显示当前状态
+/history [数量] - 查看聊天历史
+/sessions      - 列出所有会话
+/switch <标题> - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
 function handleClear(ctx: CommandContext): CommandResult {
     ctx.clearSession();
-    return { handled: true, reply: "✅ 历史记录已清除" };
+    return { handled: true, reply: "✅ 当前会话已清空" };
 }
 
 function handleStatus(): CommandResult {
@@ -153,5 +150,24 @@ async function handleSwitch(ctx: CommandContext, args: string): Promise<CommandR
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return { handled: true, reply: `❌ 切换会话失败: ${errorMsg}` };
+    }
+}
+
+async function handleRename(ctx: CommandContext, args: string): Promise<CommandResult> {
+    if (!args) {
+        return { handled: true, reply: "❌ 请提供新标题\n用法: /rename <新标题>" };
+    }
+
+    if (!ctx.renameSession) {
+        return { handled: true, reply: "❌ 无法重命名会话：功能未启用" };
+    }
+
+    try {
+        const newTitle = args.trim();
+        await ctx.renameSession(newTitle);
+        return { handled: true, reply: `✅ 会话已重命名为: ${newTitle}` };
+    } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return { handled: true, reply: `❌ 重命名会话失败: ${errorMsg}` };
     }
 }

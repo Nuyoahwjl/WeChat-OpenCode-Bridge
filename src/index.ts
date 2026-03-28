@@ -164,6 +164,14 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 saveSession(handle.sessionId, handle.session);
                 logger.info("🔄 已切换会话", { sessionId: handle.sessionId, sdkSession: sdkSessionId });
             },
+            renameSession: async (newTitle: string) => {
+                const sdkSessionId = handle.session.sdkSessionId;
+                if (!sdkSessionId) {
+                    throw new Error("当前会话未关联 OpenCode 会话");
+                }
+                await ctx.opencode.renameSession(sdkSessionId, newTitle);
+                logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, newTitle });
+            },
         };
         const result = await routeCommand(cmdCtx);
         if (result.handled && result.reply) {
