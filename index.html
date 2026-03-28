@@ -682,7 +682,6 @@
     .arch-arrow-label-bot {
       text-align: center;
       max-width: 120px;
-      white-space: normal;
       overflow-wrap: anywhere;
     }
 
@@ -696,10 +695,6 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       border-radius: 10px;
-    }
-
-    .commands-table-wrap .cmd-table {
-      min-width: 560px;
     }
 
     @media (max-width: 1024px) {
@@ -726,6 +721,10 @@
     }
 
     @media (max-width: 640px) {
+      .commands-table-wrap .cmd-table {
+        min-width: 560px;
+      }
+
       .arch-top-row {
         flex-direction: column;
         align-items: stretch;
