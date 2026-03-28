@@ -49,15 +49,24 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help          - 显示帮助信息
-/clear         - 清空当前会话
-/new [标题]    - 创建新的会话
-/rename <标题> - 重命名当前会话
-/delete <标题> - 删除指定会话
-/status        - 显示当前状态
-/history [数量] - 查看聊天历史
-/sessions      - 列出所有会话
-/switch <标题> - 切换到指定会话`;
+/help          
+    - 显示帮助信息
+/clear         
+    - 清空当前会话
+/new [标题]    
+    - 创建新的会话
+/rename <标题> 
+    - 重命名当前会话
+/delete <标题> 
+    - 删除指定会话
+/status        
+    - 显示当前状态
+/history [数量] 
+    - 查看聊天历史
+/sessions      
+    - 列出所有会话
+/switch <标题> 
+    - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
@@ -188,13 +197,13 @@ async function handleDelete(ctx: CommandContext, args: string): Promise<CommandR
     try {
         const sessionTitle = args.trim();
         const result = await ctx.deleteSession(sessionTitle);
-        
+
         if (!result.deleted) {
-            return { handled: true, reply: `❌ 未找到标题包含 "${sessionTitle}" 的会话` };
+            return { handled: true, reply: `❌ 未找到标题为 "${sessionTitle}" 的会话` };
         }
 
         if (result.wasCurrent) {
-            return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}\n⚠️ 当前会话已被删除，请使用 /new 创建新会话` };
+            return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话` };
         }
 
         return { handled: true, reply: `✅ 已删除会话: ${sessionTitle}` };

@@ -180,12 +180,12 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 logger.info("✏️ 会话已重命名", { sessionId: handle.sessionId, sdkSession: sdkSessionId, fullTitle });
             },
             deleteSession: async (sessionTitle: string) => {
-                // Find session by title
+                // Find session by exact title match
                 const sessions = await ctx.opencode.listSessions();
-                const targetTitle = sessionTitle.trim().toLowerCase();
+                const targetTitle = sessionTitle.trim();
                 
                 const matchedSession = sessions.find(s =>
-                    (s.title || "").toLowerCase().includes(targetTitle)
+                    (s.title || "") === targetTitle
                 );
                 
                 if (!matchedSession) {
