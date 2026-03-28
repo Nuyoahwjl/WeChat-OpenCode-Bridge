@@ -138,6 +138,7 @@ src/
 
 ## Testing & Debugging
 - No test framework; validate with `npx tsc --noEmit`
+- Run `npm run build` to compile TypeScript before testing or running
 - Run in dev mode: `npm run dev` for watch rebuilds
 - Start daemon: `npm run daemon:start` (requires prior `npm run setup`)
 - Check status: `npm run daemon:status`
