@@ -147,20 +147,24 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 return handle.session.sdkSessionId || "";
             },
             switchSession: (sdkSessionId: string) => {
-                // Check if we already have a local session for this SDK session
-                const existingSessionId = `${ctx.account.accountId}_${sdkSessionId}`;
-                const existingHandle = loadSession(existingSessionId);
+                // Find existing local session by SDK session ID
+                const existingSessionId = findLocalSessionBySdkId(ctx.account.accountId, sdkSessionId);
                 
-                if (existingHandle) {
-                    // Use existing local session
-                    handle.sessionId = existingHandle.sessionId;
-                    handle.session = existingHandle.session;
+                if (existingSessionId) {
+                    const existingHandle = loadSession(existingSessionId);
+                    if (existingHandle) {
+                        // Use existing local session
+                        handle.sessionId = existingHandle.sessionId;
+                        handle.session = existingHandle.session;
+                        logger.info("🔄 复用已有本地会话", { sessionId: existingSessionId, sdkSession: sdkSessionId });
+                    }
                 } else {
                     // Create new local session linked to SDK session
                     const newHandle = createSession(ctx.account.accountId);
                     newHandle.session.sdkSessionId = sdkSessionId;
                     handle.sessionId = newHandle.sessionId;
                     handle.session = newHandle.session;
+                    logger.info("🔄 创建新本地会话", { sessionId: newHandle.sessionId, sdkSession: sdkSessionId });
                 }
                 
                 saveSession(handle.sessionId, handle.session);
