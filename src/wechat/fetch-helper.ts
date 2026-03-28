@@ -34,7 +34,7 @@ export async function fetchWithRetry(
       const res = await fetch(url, {
         method,
         headers: {
-          "User-Agent": "WeChat-OpenCode-Bridge/1.0.5",
+          "User-Agent": "WeChat-OpenCode-Bridge/1.1.0",
           ...headers,
         },
         body,
