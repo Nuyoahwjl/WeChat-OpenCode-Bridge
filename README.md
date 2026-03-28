@@ -1,8 +1,7 @@
 <div align="center">
 
 
-<img src="./img/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%" style="display: block; margin: 0 auto; border: 1px solid #ccc; border-radius: 4px; padding: 8px;">
-
+<img src="./img/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%">
 <br>
 
 ***将微信个人账号连接到 OpenCode AI 的桥接服务***
