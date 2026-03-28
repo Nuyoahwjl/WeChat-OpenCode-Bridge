@@ -49,12 +49,15 @@ function handleHelp(): CommandResult {
     - 显示帮助信息
 /new [标题]    
     - 创建新的会话
+    -（无参数则以时间戳命名）
 /rename <标题> 
     - 重命名当前会话
 /delete [标题] 
-    - 删除指定会话（无参数则删除当前会话）
+    - 删除指定会话
+    -（无参数则删除当前会话）
 /history [数量] 
     - 查看聊天历史
+    - (无参数则显示最近20条)
 /sessions      
     - 列出所有会话
 /switch <标题> 
@@ -186,7 +189,7 @@ async function handleDelete(ctx: CommandContext, args: string): Promise<CommandR
 
         const deletedName = sessionTitle || ctx.getCurrentSessionTitle?.() || "当前会话";
         if (result.wasCurrent) {
-            return { handled: true, reply: `✅ 已删除会话: ${deletedName}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话` };
+            return { handled: true, reply: `✅ 已删除会话: ${deletedName}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话\n⚠️ 或使用 /switch 切换到其他会话` };
         }
 
         return { handled: true, reply: `✅ 已删除会话: ${deletedName}` };

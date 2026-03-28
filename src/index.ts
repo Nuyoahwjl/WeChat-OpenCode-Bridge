@@ -150,7 +150,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
             switchSession: (sdkSessionId: string) => {
                 // Find existing local session by SDK session ID
                 const existingSessionId = findLocalSessionBySdkId(ctx.account.accountId, sdkSessionId);
-                
+
                 if (existingSessionId) {
                     const existingHandle = loadSession(existingSessionId);
                     if (existingHandle) {
@@ -167,7 +167,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                     handle.session = newHandle.session;
                     logger.info("🔄 创建新本地会话", { sessionId: newHandle.sessionId, sdkSession: sdkSessionId });
                 }
-                
+
                 saveSession(handle.sessionId, handle.session);
                 logger.info("🔄 已切换会话", { sessionId: handle.sessionId, sdkSession: sdkSessionId });
             },
@@ -183,7 +183,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
             deleteSession: async (sessionTitle?: string) => {
                 const sessions = await ctx.opencode.listSessions();
                 let matchedSession;
-                
+
                 if (sessionTitle) {
                     // Find session by exact title match
                     const targetTitle = sessionTitle.trim();
@@ -197,35 +197,35 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                         matchedSession = sessions.find(s => s.id === currentSdkSessionId);
                     }
                 }
-                
+
                 if (!matchedSession) {
                     return { deleted: false, wasCurrent: false };
                 }
-                
+
                 const currentSdkSessionId = handle.session.sdkSessionId;
                 const isCurrent = matchedSession.id === currentSdkSessionId;
-                
+
                 // Delete from OpenCode
                 await ctx.opencode.deleteSession(matchedSession.id);
-                
+
                 // Delete local session file if exists
                 const localSessionId = findLocalSessionBySdkId(ctx.account.accountId, matchedSession.id);
                 if (localSessionId) {
                     deleteSessionFile(localSessionId);
                 }
-                
+
                 // Clear current session if it was deleted
                 if (isCurrent) {
                     handle.session.sdkSessionId = undefined;
                     saveSession(handle.sessionId, handle.session);
                 }
-                
-                logger.info("🗑️ 会话已删除", { 
-                    sdkSession: matchedSession.id, 
+
+                logger.info("🗑️ 会话已删除", {
+                    sdkSession: matchedSession.id,
                     title: matchedSession.title,
-                    wasCurrent: isCurrent 
+                    wasCurrent: isCurrent
                 });
-                
+
                 return { deleted: true, wasCurrent: isCurrent };
             },
         };
@@ -241,7 +241,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
 
     // Check if current session has been deleted
     if (!session.sdkSessionId) {
-        await sendReply(ctx.account, fromUserId, contextToken, "⚠️ 当前会话已被删除，请使用 /new 创建新会话");
+        await sendReply(ctx.account, fromUserId, contextToken, "⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话\n⚠️ 或使用/switch 切换到其他会话");
         return;
     }
 
