@@ -1,13 +1,17 @@
 <div align="center">
 
-![WeChat-OpenCode-Bridge](./img/WeChat-OpenCode-Bridge.svg)
+
+<img src="./img/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%" style="display: block; margin: 0 auto; border: 1px solid #ccc; border-radius: 4px; padding: 8px;">
+
+<br>
+
+***将微信个人账号连接到 OpenCode AI 的桥接服务***
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24.14.1-green?logo=node.js&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-11.1.0-red?logo=npm&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
-***将微信个人账号连接到 OpenCode AI 的桥接服务***
 
 </div>
 
@@ -204,8 +208,8 @@ npm run dev
 
 
 <div align="center">
-    <img src="./img/demo-3.png" alt="demo-3" width="33%" style="display: inline-block;">
-    <img src="./img/demo-4.png" alt="demo-4" width="33%" style="display: inline-block;">
-    <img src="./img/demo-5.png" alt="demo-5" width="33%" style="display: inline-block;">
+    <img src="./img/demo-3.png" alt="demo-3" width="32%" style="display: inline-block;">
+    <img src="./img/demo-4.png" alt="demo-4" width="32%" style="display: inline-block;">
+    <img src="./img/demo-5.png" alt="demo-5" width="32%" style="display: inline-block;">
 </div>
 
