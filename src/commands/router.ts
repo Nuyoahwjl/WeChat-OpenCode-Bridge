@@ -28,8 +28,6 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
             return handleHelp();
         case "clear":
             return handleClear(ctx);
-        case "status":
-            return handleStatus();
         case "new":
             return handleNew(ctx, args);
         case "history":
@@ -59,8 +57,6 @@ function handleHelp(): CommandResult {
     - 重命名当前会话
 /delete <标题> 
     - 删除指定会话
-/status        
-    - 显示当前状态
 /history [数量] 
     - 查看聊天历史
 /sessions      
@@ -73,10 +69,6 @@ function handleHelp(): CommandResult {
 function handleClear(ctx: CommandContext): CommandResult {
     ctx.clearSession();
     return { handled: true, reply: "✅ 当前会话已清空" };
-}
-
-function handleStatus(): CommandResult {
-    return { handled: true, reply: "状态: 运行中" };
 }
 
 async function handleNew(ctx: CommandContext, args: string): Promise<CommandResult> {
