@@ -329,7 +329,7 @@ async function runDaemon(): Promise<void> {
         console.log("✅ OpenCode 服务已连接");
     } catch (err) {
         console.error("❌ " + (err instanceof Error ? err.message : String(err)));
-        console.log("   请确保 OpenCode 服务已启动: opencode serve");
+        console.log("   请在工作目录下运行: opencode serve");
         process.exit(1);
     }
 
