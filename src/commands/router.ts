@@ -6,6 +6,7 @@ export interface CommandContext {
     getChatHistoryText: (limit?: number) => string;
     listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
     getCurrentSessionId?: () => string;
+    switchSession?: (sessionId: string) => void;
 }
 
 export interface CommandResult {
@@ -33,6 +34,8 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
             return handleHistory(ctx, args);
         case "sessions":
             return await handleSessions(ctx);
+        case "switch":
+            return await handleSwitch(ctx, args);
         default:
             return { handled: false };
     }
@@ -45,7 +48,8 @@ function handleHelp(): CommandResult {
 /new           - 创建新的会话
 /status        - 显示当前状态
 /history [num] - 查看聊天历史
-/sessions      - 列出所有会话`;
+/sessions      - 列出所有会话
+/switch <标题> - 切换到指定会话`;
     return { handled: true, reply: help };
 }
 
@@ -93,16 +97,17 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
         if (ctx.getCurrentSessionId) {
             currentSessionId = ctx.getCurrentSessionId();
         }
-        
+
         let reply = "📋 会话列表：\n\n";
         sessions.forEach((session, index) => {
             const title = session.title || "未命名会话";
             const created = formatTime(session.created);
             const isCurrent = session.id === currentSessionId;
             const marker = isCurrent ? " ✅ (当前会话)" : "";
-            reply += `${index + 1}. ${title}${marker}\n`;
+            reply += `${index + 1}. ${title}\n`;
             reply += `   ID: ${session.id.substring(0, 12)}...\n`;
-            reply += `   创建: ${created}\n\n`;
+            reply += `   创建: ${created}\n`;
+            reply += `   ${marker}\n\n`;
         });
 
         reply += `共 ${sessions.length} 个会话`;
@@ -110,5 +115,35 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return { handled: true, reply: `❌ 获取会话列表失败: ${errorMsg}` };
+    }
+}
+
+async function handleSwitch(ctx: CommandContext, args: string): Promise<CommandResult> {
+    if (!args) {
+        return { handled: true, reply: "❌ 请提供会话标题\n用法: /switch <会话标题>" };
+    }
+
+    if (!ctx.listSessions || !ctx.switchSession) {
+        return { handled: true, reply: "❌ 无法切换会话：功能未启用" };
+    }
+
+    try {
+        const sessions = await ctx.listSessions();
+        const targetTitle = args.trim().toLowerCase();
+
+        // Find session by title (case-insensitive partial match)
+        const matchedSession = sessions.find(s =>
+            (s.title || "").toLowerCase().includes(targetTitle)
+        );
+
+        if (!matchedSession) {
+            return { handled: true, reply: `❌ 未找到标题包含 "${args}" 的会话` };
+        }
+
+        ctx.switchSession(matchedSession.id);
+        return { handled: true, reply: `✅ 已切换到会话: ${matchedSession.title || "未命名会话"}` };
+    } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return { handled: true, reply: `❌ 切换会话失败: ${errorMsg}` };
     }
 }

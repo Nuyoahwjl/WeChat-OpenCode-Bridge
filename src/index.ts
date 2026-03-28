@@ -6,6 +6,7 @@ import { OpenCodeClient, type Session } from "./opencode/client.js";
 import { loadLatestAccount, saveAccount, ensureDataDir } from "./store/account.js";
 import {
     createSession,
+    loadSession,
     saveSession,
     addChatMessage,
     clearSession,
@@ -142,6 +143,26 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
             },
             getCurrentSessionId: () => {
                 return handle.session.sdkSessionId || "";
+            },
+            switchSession: (sdkSessionId: string) => {
+                // Check if we already have a local session for this SDK session
+                const existingSessionId = `${ctx.account.accountId}_${sdkSessionId}`;
+                const existingHandle = loadSession(existingSessionId);
+                
+                if (existingHandle) {
+                    // Use existing local session
+                    handle.sessionId = existingHandle.sessionId;
+                    handle.session = existingHandle.session;
+                } else {
+                    // Create new local session linked to SDK session
+                    const newHandle = createSession(ctx.account.accountId);
+                    newHandle.session.sdkSessionId = sdkSessionId;
+                    handle.sessionId = newHandle.sessionId;
+                    handle.session = newHandle.session;
+                }
+                
+                saveSession(handle.sessionId, handle.session);
+                logger.info("🔄 已切换会话", { sessionId: handle.sessionId, sdkSession: sdkSessionId });
             },
         };
         const result = await routeCommand(cmdCtx);
