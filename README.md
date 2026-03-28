@@ -22,6 +22,28 @@ WeChat OpenCode Bridge 是一个基于 Node.js 的桥接服务，它能够：
 - 📱 扫码绑定，简单快捷
 
 ## 🏗️ 项目架构
+```mermaid
+flowchart LR
+    %% 节点定义
+    A["📱 微信客户端"]:::wechat
+    B["🌉 WeChat OpenCode<br/>Bridge"]:::bridge
+    C["🤖 OpenCode Server"]:::opencode
+    D["💾 本地存储<br/>~/.WeChat-OpenCode-Bridge/"]:::storage
+
+    %% 连接线
+    A -->|消息/指令| B
+    B -->|API 请求| C
+    C -->|OpenCode 回复| B
+    B -->|消息/回复| A
+    B -->|读写操作| D
+
+    %% 样式
+    classDef wechat fill:#00B96B,stroke:#095028,stroke-width:3px,color:#fff,font-weight:bold;
+    classDef bridge fill:#1890FF,stroke:#003EB3,stroke-width:3px,color:#fff,font-weight:bold;
+    classDef opencode fill:#F59E0B,stroke:#B45309,stroke-width:3px,color:#fff,font-weight:bold;
+    classDef storage fill:#6B7280,stroke:#374151,stroke-width:3px,color:#fff,font-weight:bold;
+```
+
 ```
 WeChat-OpenCode-Bridge/
 ├── src/
@@ -49,42 +71,12 @@ WeChat-OpenCode-Bridge/
 └── AGENTS.md                 # 开发者文档
 ```
 
-```mermaid
-flowchart LR
-    %% 节点定义
-    A[微信客户端]:::wechat
-    B[WeChat OpenCode Bridge]:::bridge
-    C[OpenCode Server]:::opencode
-    D[本地存储<br/>~/.WeChat-OpenCode-Bridge/]:::storage
-
-    %% 连接线（无背景样式标签）
-        A -- 消息/指令 --> B
-        B -- API 请求 --> C
-        C -- OpenCode 回复 --> B
-        B -- 消息/回复 --> A
-        B -- 读写 --> D
-
-    %% 样式
-    classDef wechat fill:#7bbfea,stroke:#2176ae,stroke-width:2px,color:#fff;
-    classDef bridge fill:#f7c873,stroke:#b8860b,stroke-width:2px,color:#222;
-    classDef opencode fill:#7ed957,stroke:#388e3c,stroke-width:2px,color:#222;
-    classDef storage fill:#e0e0e0,stroke:#757575,stroke-width:2px,color:#222,font-style:italic;
-
-    %% 箭头样式
-    linkStyle 0 stroke:#2176ae,stroke-width:2px;
-    linkStyle 1 stroke:#b8860b,stroke-width:2px,stroke-dasharray: 5 5;
-    linkStyle 2 stroke:#388e3c,stroke-width:2px;
-    linkStyle 3 stroke:#2176ae,stroke-width:2px,stroke-dasharray: 5 5;
-    linkStyle 4 stroke:#757575,stroke-width:2px,stroke-dasharray: 2 2;
-```
 
 ## ✅ 前提条件
-| 依赖 | 版本要求 | 说明 |
-|------|----------|------|
-| [Node.js](https://nodejs.org/) | 24+ | JavaScript 运行需要 |
-| [npm](https://www.npmjs.com/) | 11+ | Node.js 包管理器 |
-| [OpenCode](https://opencode.ai/) | 无限制 | OpeCode Server |
-| [WeChat](https://weixin.qq.com/) | >=8.0.70 | 支持Clawbot的账号 |
+- [x] **[Node.js](https://nodejs.org/)** 24+ — JavaScript 运行需要
+- [x] **[npm](https://www.npmjs.com/)** 11+ — Node.js 包管理器
+- [x] **[OpenCode](https://opencode.ai/)** — OpeCode Server
+- [x] **[WeChat](https://weixin.qq.com/)** >=8.0.70 — 支持Clawbot的账号
 
 
 ## 🚀 使用方法
@@ -97,23 +89,22 @@ flowchart LR
     ```bash
     npm install
     ```
-    > 💡 安装完成后会自动执行 `npm run build` 编译 TypeScript
+    > 安装完成后会自动执行 `npm run build` 编译
 - ### 3️⃣ 绑定微信（首次使用）
     ```bash
     npm run setup
     ```
-    按提示用微信扫描终端中的二维码完成绑定。
-    > ⚠️ 首次绑定后，以后不需要再绑定（除非会话过期）
+    > 扫描终端中的二维码完成绑定，以后不需要再绑定
 - ### 4️⃣ 启动 OpenCode 服务
-    在你的**工作目录**下运行：
     ```bash
     opencode serve
     ```
+    > 在你的~~工作目录~~下运行
 - ### 5️⃣ 启动桥接服务
-    在**仓库目录**下运行：
     ```bash
     npm run start
     ```
+    > 在当前~~仓库目录~~下运行
 
 ## 📋 可用命令
 | 命令 | 说明 |
@@ -125,8 +116,7 @@ flowchart LR
 | `npm run status` | 显示当前绑定账号和会话状态 |
 
 
-## 💡 微信快捷指令
-在微信中发送以下指令：
+## 🔦 微信快捷指令
 | 指令 | 说明 | 示例 |
 |------|------|------|
 | `/help` | 显示帮助信息 | `/help` |
@@ -155,7 +145,7 @@ flowchart LR
 删除指定的会话（同时删除 OpenCode 服务器和本地记录）。
 - 有参数：删除标题**包含**该关键词的会话（不区分大小写）
 - 无参数：删除当前会话
-- ⚠️ 删除当前会话后，请使用 `/new` 创建新会话或 `/switch` 切换到其他会话
+- 删除当前会话后，请使用 `/new` 创建新会话或 `/switch` 切换到其他会话
 
 #### `/history [数量]`
 查看当前会话的聊天历史记录。
@@ -189,15 +179,15 @@ flowchart LR
 
 
 ## 🛠️ 开发相关
-### 类型检查
-```bash
-npx tsc --noEmit
-```
-### 开发模式
-```bash
-npm run dev
-```
-修改代码后会自动重新编译，无需手动运行 `npm run build`。
+- ### 类型检查
+    ```bash
+    npx tsc --noEmit
+    ```
+- ### 开发模式
+    ```bash
+    npm run dev
+    ```
+    修改代码后会自动重新编译，无需手动运行 `npm run build`。
 
 
 ## 🧩 演示
