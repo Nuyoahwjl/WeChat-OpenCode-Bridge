@@ -74,7 +74,7 @@ async function handleNew(ctx: CommandContext, args: string): Promise<CommandResu
 function handleHistory(ctx: CommandContext, args: string): CommandResult {
     const limit = args ? parseInt(args) : 20;
     const history = ctx.getChatHistoryText(limit);
-    return { handled: true, reply: history || "暂无聊天记录" };
+    return { handled: true, reply: history || "😂 暂无聊天记录" };
 }
 
 async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
