@@ -1,7 +1,7 @@
 <div align="center">
 
 
-<img src="./img/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%">
+<img src="./images/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%">
 <br>
 
 ***将微信个人账号连接到 OpenCode AI 的桥接服务***
@@ -201,14 +201,14 @@ npm run dev
 
 
 ## 🧩 演示
-![demo-1](./img/demo-1.png)
+![demo-1](./images/demo-1.png)
 
-![demo-2](./img/demo-2.png)
+![demo-2](./images/demo-2.png)
 
 
 <div align="center">
-    <img src="./img/demo-3.png" alt="demo-3" width="32%" style="display: inline-block;">
-    <img src="./img/demo-4.png" alt="demo-4" width="32%" style="display: inline-block;">
-    <img src="./img/demo-5.png" alt="demo-5" width="32%" style="display: inline-block;">
+    <img src="./images/demo-3.png" alt="demo-3" width="32%" style="display: inline-block;">
+    <img src="./images/demo-4.png" alt="demo-4" width="32%" style="display: inline-block;">
+    <img src="./images/demo-5.png" alt="demo-5" width="32%" style="display: inline-block;">
 </div>
 
