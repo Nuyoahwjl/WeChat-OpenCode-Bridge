@@ -1,6 +1,6 @@
 <div align="center">
 
-![svg](./img/WeChat-OpenCode-Bridge.svg)
+![WeChat-OpenCode-Bridge](./img/WeChat-OpenCode-Bridge.svg)
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24.14.1-green?logo=node.js&logoColor=white)
@@ -202,4 +202,10 @@ npm run dev
 
 ![demo-2](./img/demo-2.png)
 
-![demo-3](./img/demo-3.png) ![demo-4](./img/demo-4.png) ![demo-5](./img/demo-5.png) 
+
+<div align="center">
+    <img src="./img/demo-3.png" alt="demo-3" width="33%" style="display: inline-block;">
+    <img src="./img/demo-4.png" alt="demo-4" width="33%" style="display: inline-block;">
+    <img src="./img/demo-5.png" alt="demo-5" width="33%" style="display: inline-block;">
+</div>
+
