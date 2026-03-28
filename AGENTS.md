@@ -117,6 +117,8 @@ src/
 - `LOG_LEVEL` env var (numeric: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR; default: INFO)
 - Include context in data objects: `{ accountId, sessionId, error }`
 - Format: `HH:MM:SS [LEVEL]  message  key=value`
+- Logs auto-saved to `~/.WeChat-OpenCode-Bridge/logs/{ISO-timestamp}.log` on each `start`/`setup`
+- File logging enabled via `logger.enableFileLogging(logsDir)` at daemon/setup entry
 
 ### Configuration & Environment
 - Data stored in `~/.WeChat-OpenCode-Bridge/` with subdirs `accounts/`, `sessions/`, `logs/`
@@ -193,7 +195,7 @@ src/
 - Run `npm run dev` for watch rebuilds
 - Set `LOG_LEVEL=0` for debug-level logging
 - Check status: `npm run status`
-- Logs output to stdout/stderr (not to files by default)
+- Log files saved to `~/.WeChat-OpenCode-Bridge/logs/{timestamp}.log`
 
 ## Common Gotchas
 

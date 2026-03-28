@@ -19,6 +19,7 @@ import {
 import { routeCommand, type CommandContext } from "./commands/router.js";
 import { logger } from "./logger.js";
 import { MessageType, MessageItemType, MessageState, type WeixinMessage, type AccountData } from "./wechat/types.js";
+import { LOGS_DIR } from "./constants.js";
 
 const MAX_MESSAGE_LENGTH = 2048;
 let clientCounter = 0;
@@ -56,6 +57,7 @@ function generateTitle(): string {
 }
 
 async function runSetup(): Promise<void> {
+    logger.enableFileLogging(LOGS_DIR);
     ensureDataDir();
     console.log("⚙️ 正在设置...\n");
     while (true) {
@@ -313,6 +315,7 @@ async function sendReply(
 }
 
 async function runDaemon(): Promise<void> {
+    logger.enableFileLogging(LOGS_DIR);
     const account = loadLatestAccount();
     if (!account) {
         console.error("❌ 未找到账号，请先运行 npm run setup");

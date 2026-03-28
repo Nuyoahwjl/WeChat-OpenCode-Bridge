@@ -1,3 +1,6 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+
 export enum LogLevel {
     DEBUG = 0,
     INFO = 1,
@@ -7,9 +10,30 @@ export enum LogLevel {
 
 class Logger {
     private level: LogLevel;
+    private logStream: fs.WriteStream | null = null;
 
     constructor(level: LogLevel = LogLevel.INFO) {
         this.level = level;
+    }
+
+    enableFileLogging(logsDir: string): void {
+        try {
+            fs.mkdirSync(logsDir, { recursive: true });
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+            const logFile = path.join(logsDir, `${timestamp}.log`);
+            this.logStream = fs.createWriteStream(logFile, { flags: "a" });
+            this.logStream.on("error", (err) => {
+                console.error("Log file write error:", err.message);
+            });
+        } catch (err) {
+            console.error("Failed to create log file:", String(err));
+        }
+    }
+
+    private writeToFile(line: string): void {
+        if (this.logStream) {
+            this.logStream.write(line + "\n");
+        }
     }
 
     private format(
@@ -38,25 +62,33 @@ class Logger {
 
     debug(message: string, data?: Record<string, unknown>): void {
         if (this.level <= LogLevel.DEBUG) {
-            console.debug(this.format("DEBUG", message, data));
+            const line = this.format("DEBUG", message, data);
+            console.debug(line);
+            this.writeToFile(line);
         }
     }
 
     info(message: string, data?: Record<string, unknown>): void {
         if (this.level <= LogLevel.INFO) {
-            console.log(this.format("INFO", message, data));
+            const line = this.format("INFO", message, data);
+            console.log(line);
+            this.writeToFile(line);
         }
     }
 
     warn(message: string, data?: Record<string, unknown>): void {
         if (this.level <= LogLevel.WARN) {
-            console.warn(this.format("WARN", message, data));
+            const line = this.format("WARN", message, data);
+            console.warn(line);
+            this.writeToFile(line);
         }
     }
 
     error(message: string, data?: Record<string, unknown>): void {
         if (this.level <= LogLevel.ERROR) {
-            console.error(this.format("ERROR", message, data));
+            const line = this.format("ERROR", message, data);
+            console.error(line);
+            this.writeToFile(line);
         }
     }
 }
