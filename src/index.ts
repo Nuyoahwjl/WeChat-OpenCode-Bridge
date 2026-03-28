@@ -122,14 +122,14 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
             clearSession: () => {
                 clearSession(handle.sessionId, session);
             },
-            newSession: async () => {
+            newSession: async (customTitle?: string) => {
                 const newHandle = createSession(ctx.account.accountId);
-                const title = generateTitle();
+                const title = customTitle ? `WeChat: ${customTitle}` : generateTitle();
                 newHandle.session.sdkSessionId = await ctx.opencode.createSession(title);
                 handle.sessionId = newHandle.sessionId;
                 handle.session = newHandle.session;
                 saveSession(handle.sessionId, handle.session);
-                logger.info("💌 新会话已创建", { session: handle.sessionId, sdkSession: newHandle.session.sdkSessionId });
+                logger.info("💌 新会话已创建", { session: handle.sessionId, sdkSession: newHandle.session.sdkSessionId, title });
             },
             getChatHistoryText: (limit?: number) => getChatHistoryText(session, limit),
             listSessions: async () => {

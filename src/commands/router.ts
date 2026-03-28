@@ -2,7 +2,7 @@ export interface CommandContext {
     text: string;
     updateSession: (partial: any) => void;
     clearSession: () => void;
-    newSession: () => Promise<void>;
+    newSession: (title?: string) => Promise<void>;
     getChatHistoryText: (limit?: number) => string;
     listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
     getCurrentSessionId?: () => string;
@@ -45,7 +45,7 @@ function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
 /help          - 显示帮助信息
 /clear         - 清空历史记录
-/new           - 创建新的会话
+/new [标题]    - 创建新的会话
 /status        - 显示当前状态
 /history [num] - 查看聊天历史
 /sessions      - 列出所有会话
@@ -63,7 +63,8 @@ function handleStatus(): CommandResult {
 }
 
 async function handleNew(ctx: CommandContext, args: string): Promise<CommandResult> {
-    await ctx.newSession();
+    const title = args.trim() || undefined;
+    await ctx.newSession(title);
     return { handled: true, reply: "✅ 已创建新会话" };
 }
 
