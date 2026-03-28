@@ -140,6 +140,9 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                     return [];
                 }
             },
+            getCurrentSessionId: () => {
+                return handle.session.sdkSessionId || "";
+            },
         };
         const result = await routeCommand(cmdCtx);
         if (result.handled && result.reply) {

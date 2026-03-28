@@ -5,6 +5,7 @@ export interface CommandContext {
     newSession: () => Promise<void>;
     getChatHistoryText: (limit?: number) => string;
     listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
+    getCurrentSessionId?: () => string;
 }
 
 export interface CommandResult {
@@ -39,12 +40,12 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
 
 function handleHelp(): CommandResult {
     const help = `微信 OpenCode 助手命令：
-/help - 显示帮助信息
-/clear - 清空历史记录
-/new - 创建新会话
-/status - 显示当前状态
-/history [数量] - 查看聊天历史
-/sessions - 列出所有会话`;
+/help          - 显示帮助信息
+/clear         - 清空历史记录
+/new           - 创建新的会话
+/status        - 显示当前状态
+/history [num] - 查看聊天历史
+/sessions      - 列出所有会话`;
     return { handled: true, reply: help };
 }
 
@@ -72,13 +73,13 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
     if (!ctx.listSessions) {
         return { handled: true, reply: "❌ 无法获取会话列表：未提供会话列表功能" };
     }
-    
+
     try {
         const sessions = await ctx.listSessions();
         if (sessions.length === 0) {
             return { handled: true, reply: "📭 当前没有会话" };
         }
-        
+
         const formatTime = (timestamp: number) => {
             // OpenCode API returns timestamps in milliseconds, but check if it's seconds
             // Unix timestamp in seconds is 10 digits, in milliseconds is 13 digits
@@ -86,16 +87,24 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
             const date = new Date(ts);
             return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         };
+
+        // Get current session ID if available
+        let currentSessionId = "";
+        if (ctx.getCurrentSessionId) {
+            currentSessionId = ctx.getCurrentSessionId();
+        }
         
-        let reply = "📋 当前会话列表：\n\n";
+        let reply = "📋 会话列表：\n\n";
         sessions.forEach((session, index) => {
             const title = session.title || "未命名会话";
             const created = formatTime(session.created);
-            reply += `${index + 1}. ${title}\n`;
-            reply += `   ID: ${session.id.substring(0, 8)}...\n`;
+            const isCurrent = session.id === currentSessionId;
+            const marker = isCurrent ? " ✅ (当前会话)" : "";
+            reply += `${index + 1}. ${title}${marker}\n`;
+            reply += `   ID: ${session.id.substring(0, 12)}...\n`;
             reply += `   创建: ${created}\n\n`;
         });
-        
+
         reply += `共 ${sessions.length} 个会话`;
         return { handled: true, reply };
     } catch (err) {
