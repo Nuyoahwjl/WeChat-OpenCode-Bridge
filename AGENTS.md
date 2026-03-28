@@ -31,7 +31,7 @@ src/
 ├── constants.ts          # Shared constants (paths, URLs, limits)
 ├── config.ts             # Config load/save to ~/.WeChat-OpenCode-Bridge/
 ├── commands/
-│   └── router.ts         # Slash-command dispatcher (/help, /clear, etc.)
+│   └── router.ts         # Slash-command dispatcher (/help, /clear, /sessions, etc.)
 ├── opencode/
 │   └── client.ts         # HTTP client for OpenCode REST API
 ├── store/
@@ -122,6 +122,7 @@ src/
 2. Implement a `handleXxx(ctx: CommandContext, args: string): CommandResult` function
 3. Return `{ handled: true, reply: "..." }` to send a reply, or `{ handled: true }` to silently handle
 4. Update the `/help` text in `handleHelp()` to include the new command
+5. For commands requiring external services (like `/sessions`), add optional methods to `CommandContext` interface
 
 ### Dependencies
 - Runtime: `qrcode-terminal` (QR code display in terminal)

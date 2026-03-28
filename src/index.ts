@@ -2,7 +2,7 @@ import process from "node:process";
 import { WeChatApi } from "./wechat/api.js";
 import { startQrLogin, waitForQrScan, displayQrInTerminal } from "./wechat/login.js";
 import { createMonitor, type MonitorCallbacks } from "./wechat/monitor.js";
-import { OpenCodeClient } from "./opencode/client.js";
+import { OpenCodeClient, type Session } from "./opencode/client.js";
 import { loadLatestAccount, saveAccount, ensureDataDir } from "./store/account.js";
 import {
     createSession,
@@ -11,7 +11,7 @@ import {
     clearSession,
     getChatHistoryText,
     type SessionHandle,
-    type Session,
+    type Session as LocalSession,
 } from "./store/session.js";
 import { routeCommand, type CommandContext } from "./commands/router.js";
 import { logger } from "./logger.js";
@@ -131,6 +131,15 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 logger.info("💌 新会话已创建", { session: handle.sessionId, sdkSession: newHandle.session.sdkSessionId });
             },
             getChatHistoryText: (limit?: number) => getChatHistoryText(session, limit),
+            listSessions: async () => {
+                try {
+                    return await ctx.opencode.listSessions();
+                } catch (err) {
+                    const errorMsg = err instanceof Error ? err.message : String(err);
+                    logger.error("❌ 获取会话列表失败", { error: errorMsg });
+                    return [];
+                }
+            },
         };
         const result = await routeCommand(cmdCtx);
         if (result.handled && result.reply) {

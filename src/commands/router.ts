@@ -4,6 +4,7 @@ export interface CommandContext {
     clearSession: () => void;
     newSession: () => Promise<void>;
     getChatHistoryText: (limit?: number) => string;
+    listSessions?: () => Promise<Array<{ id: string; title?: string; created: number; updated: number }>>;
 }
 
 export interface CommandResult {
@@ -29,6 +30,8 @@ export async function routeCommand(ctx: CommandContext): Promise<CommandResult> 
             return handleNew(ctx, args);
         case "history":
             return handleHistory(ctx, args);
+        case "sessions":
+            return await handleSessions(ctx);
         default:
             return { handled: false };
     }
@@ -40,7 +43,8 @@ function handleHelp(): CommandResult {
 /clear - 清空历史记录
 /new - 创建新会话
 /status - 显示当前状态
-/history [数量] - 查看聊天历史`;
+/history [数量] - 查看聊天历史
+/sessions - 列出所有 OpenCode 会话`;
     return { handled: true, reply: help };
 }
 
@@ -62,4 +66,37 @@ function handleHistory(ctx: CommandContext, args: string): CommandResult {
     const limit = args ? parseInt(args) : 20;
     const history = ctx.getChatHistoryText(limit);
     return { handled: true, reply: history || "暂无聊天记录" };
+}
+
+async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
+    if (!ctx.listSessions) {
+        return { handled: true, reply: "❌ 无法获取会话列表：未提供会话列表功能" };
+    }
+    
+    try {
+        const sessions = await ctx.listSessions();
+        if (sessions.length === 0) {
+            return { handled: true, reply: "📭 当前没有会话" };
+        }
+        
+        const formatTime = (timestamp: number) => {
+            const date = new Date(timestamp);
+            return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        };
+        
+        let reply = "📋 当前会话列表：\n\n";
+        sessions.forEach((session, index) => {
+            const title = session.title || "未命名会话";
+            const created = formatTime(session.created);
+            reply += `${index + 1}. ${title}\n`;
+            reply += `   ID: ${session.id.substring(0, 8)}...\n`;
+            reply += `   创建: ${created}\n\n`;
+        });
+        
+        reply += `共 ${sessions.length} 个会话`;
+        return { handled: true, reply };
+    } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return { handled: true, reply: `❌ 获取会话列表失败: ${errorMsg}` };
+    }
 }

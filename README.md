@@ -34,6 +34,14 @@ npm install
    npm run daemon:status
    ```
 
+4. **Available Commands**:
+   - `/help` - Show help information
+   - `/clear` - Clear chat history
+   - `/new` - Create new session
+   - `/status` - Show current status
+   - `/history [count]` - View chat history
+   - `/sessions` - List all OpenCode sessions
+
 ## Development
 
 ```bash

@@ -2,6 +2,13 @@ import { logger } from "../logger.js";
 
 const OPENCODE_URL = process.env.OPENCODE_URL || "http://localhost:4096";
 
+export interface Session {
+    id: string;
+    title?: string;
+    created: number;
+    updated: number;
+}
+
 export interface QueryOptions {
     prompt: string;
     resume?: string;
@@ -32,6 +39,38 @@ export class OpenCodeClient {
             return res.ok;
         } catch {
             return false;
+        }
+    }
+
+    async listSessions(): Promise<Session[]> {
+        try {
+            const url = `${this.baseUrl}/session`;
+            logger.info("📋 正在获取会话列表", { url });
+            
+            const res = await fetch(url, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                logger.error("❌ 获取会话列表失败", { status: res.status, body: text });
+                throw new Error(`Failed to list sessions: ${res.status} - ${text}`);
+            }
+
+            const data = (await res.json()) as any[];
+            logger.info("✅ 获取到会话列表", { count: data.length });
+            
+            return data.map((item: any) => ({
+                id: item.id,
+                title: item.title || "未命名会话",
+                created: item.created || Date.now(),
+                updated: item.updated || Date.now(),
+            }));
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            logger.error("❌ 获取会话列表失败", { error: errorMessage });
+            throw err;
         }
     }
 
