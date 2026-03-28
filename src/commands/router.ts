@@ -107,11 +107,11 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
             const title = session.title || "未命名会话";
             const created = formatTime(session.created);
             const isCurrent = session.id === currentSessionId;
-            const marker = isCurrent ? "✅ (当前会话)" : "";
+            const marker = isCurrent ? "✅ (当前会话)\n" : "";
             reply += `${index + 1}.${title}\n`;
             reply += `   ID: ${session.id.substring(0, 12)}...\n`;
             reply += `   创建: ${created}\n`;
-            reply += `   ${marker}\n\n`;
+            reply += `   ${marker}\n`;
         });
 
         reply += `共 ${sessions.length} 个会话`;

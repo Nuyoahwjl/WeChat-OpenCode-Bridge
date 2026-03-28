@@ -217,7 +217,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 // Clear current session if it was deleted
                 if (isCurrent) {
                     handle.session.sdkSessionId = undefined;
-                    saveSession(handle.sessionId, handle.session);
+                    // saveSession(handle.sessionId, handle.session);
                 }
 
                 logger.info("🗑️ 会话已删除", {
