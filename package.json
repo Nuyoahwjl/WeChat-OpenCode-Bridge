@@ -1,0 +1,32 @@
+{
+    "name": "wechat-opencode-bridge",
+    "version": "1.0.5",
+    "description": "将微信连接到 OpenCode 的桥接服务",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "postinstall": "npm run build",
+        "start": "node dist/index.js",
+        "dev": "tsc --watch",
+        "setup": "node dist/index.js setup",
+        "daemon:start": "node dist/index.js start",
+        "daemon:stop": "node dist/index.js stop",
+        "daemon:status": "node dist/index.js status"
+    },
+    "dependencies": {
+        "qrcode-terminal": "^0.12.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0",
+        "@types/qrcode-terminal": "^0.12.0",
+        "typescript": "^5.9.3"
+    },
+    "keywords": [
+        "wechat",
+        "opencode",
+        "bot",
+        "bridge"
+    ],
+    "author": "",
+    "license": "MIT"
+}
