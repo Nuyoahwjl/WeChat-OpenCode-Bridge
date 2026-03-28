@@ -61,11 +61,16 @@ export class OpenCodeClient {
             const data = (await res.json()) as any[];
             logger.info("✅ 获取到会话列表", { count: data.length });
             
+            // Debug: Log first session to see actual structure
+            if (data.length > 0) {
+                logger.debug("📝 第一个会话数据结构", { firstSession: JSON.stringify(data[0]) });
+            }
+            
             return data.map((item: any) => ({
                 id: item.id,
                 title: item.title || "未命名会话",
-                created: item.created || Date.now(),
-                updated: item.updated || Date.now(),
+                created: item.time?.created || Date.now(),
+                updated: item.time?.updated || Date.now(),
             }));
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : String(err);

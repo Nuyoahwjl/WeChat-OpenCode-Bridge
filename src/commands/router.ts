@@ -44,7 +44,7 @@ function handleHelp(): CommandResult {
 /new - 创建新会话
 /status - 显示当前状态
 /history [数量] - 查看聊天历史
-/sessions - 列出所有 OpenCode 会话`;
+/sessions - 列出所有会话`;
     return { handled: true, reply: help };
 }
 
@@ -80,7 +80,10 @@ async function handleSessions(ctx: CommandContext): Promise<CommandResult> {
         }
         
         const formatTime = (timestamp: number) => {
-            const date = new Date(timestamp);
+            // OpenCode API returns timestamps in milliseconds, but check if it's seconds
+            // Unix timestamp in seconds is 10 digits, in milliseconds is 13 digits
+            const ts = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+            const date = new Date(ts);
             return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         };
         
