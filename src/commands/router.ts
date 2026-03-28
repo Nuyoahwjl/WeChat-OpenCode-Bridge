@@ -8,7 +8,7 @@ export interface CommandContext {
     getCurrentSessionTitle?: () => string;
     switchSession?: (sessionId: string) => void;
     renameSession?: (newTitle: string) => Promise<void>;
-    deleteSession?: (sessionTitle?: string) => Promise<{ deleted: boolean; wasCurrent: boolean }>;
+    deleteSession?: (sessionTitle?: string) => Promise<{ deleted: boolean; wasCurrent: boolean; deletedTitle?: string }>;
 }
 
 export interface CommandResult {
@@ -182,12 +182,12 @@ async function handleDelete(ctx: CommandContext, args: string): Promise<CommandR
 
         if (!result.deleted) {
             if (sessionTitle) {
-                return { handled: true, reply: `❌ 未找到标题为 "${sessionTitle}" 的会话` };
+                return { handled: true, reply: `❌ 未找到标题包含 "${sessionTitle}" 的会话` };
             }
             return { handled: true, reply: "❌ 无法删除当前会话" };
         }
 
-        const deletedName = sessionTitle || ctx.getCurrentSessionTitle?.() || "当前会话";
+        const deletedName = result.deletedTitle || sessionTitle || ctx.getCurrentSessionTitle?.() || "当前会话";
         if (result.wasCurrent) {
             return { handled: true, reply: `✅ 已删除会话: ${deletedName}\n⚠️ 当前会话已被删除\n⚠️ 请使用 /new 创建新会话\n⚠️ 或使用 /switch 切换到其他会话` };
         }

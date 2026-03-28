@@ -185,10 +185,10 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 let matchedSession;
 
                 if (sessionTitle) {
-                    // Find session by exact title match
-                    const targetTitle = sessionTitle.trim();
+                    // Find session by title (case-insensitive partial match)
+                    const targetTitle = sessionTitle.trim().toLowerCase();
                     matchedSession = sessions.find(s =>
-                        (s.title || "") === targetTitle
+                        (s.title || "").toLowerCase().includes(targetTitle)
                     );
                 } else {
                     // Delete current session
@@ -217,7 +217,6 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                 // Clear current session if it was deleted
                 if (isCurrent) {
                     handle.session.sdkSessionId = undefined;
-                    // saveSession(handle.sessionId, handle.session);
                 }
 
                 logger.info("🗑️ 会话已删除", {
@@ -226,7 +225,7 @@ async function handleMessage(msg: WeixinMessage, ctx: DaemonContext): Promise<vo
                     wasCurrent: isCurrent
                 });
 
-                return { deleted: true, wasCurrent: isCurrent };
+                return { deleted: true, wasCurrent: isCurrent, deletedTitle: matchedSession.title };
             },
         };
         const result = await routeCommand(cmdCtx);
