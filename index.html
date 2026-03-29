@@ -26,6 +26,8 @@
       --gold: #f7c873;
       --blue: #7bbfea;
       --cmd-table-mobile-min-width: 560px;
+      --arch-diagram-fixed-width: 980px;
+      --arch-split-fixed-width: 980px;
     }
 
     *,
@@ -321,7 +323,7 @@
 
     /* ── TERMINAL DEMO ──────────────────────────────── */
     .terminal-wrap {
-      max-width: 900px;
+      max-width: 800px;
       width: 100%;
       margin: 72px auto 0;
       animation: fadeSlideDown 0.7s 0.55s ease both;
@@ -698,6 +700,61 @@
       border-radius: 10px;
     }
 
+    .arch-diagram-wrap,
+    .arch-split-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 10px;
+    }
+
+    .arch-diagram-fixed {
+      width: var(--arch-diagram-fixed-width);
+      min-width: var(--arch-diagram-fixed-width);
+      max-width: none;
+    }
+
+    .arch-diagram.arch-diagram-fixed .arch-top-row {
+      width: var(--arch-diagram-fixed-width);
+      max-width: none;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 10px;
+    }
+
+    .arch-diagram.arch-diagram-fixed .flow-node {
+      width: 220px;
+      min-width: 220px;
+      max-width: 220px;
+      padding: 28px 24px;
+    }
+
+    .arch-diagram-fixed .arch-storage {
+      width: 220px;
+      min-width: 220px;
+      max-width: 220px;
+    }
+
+    .arch-diagram-fixed .arch-bidir-h {
+      width: 130px;
+      min-width: 130px;
+      max-width: 130px;
+      padding: 0 6px;
+    }
+
+    .arch-diagram-fixed .arch-line {
+      width: auto;
+      min-width: 36px;
+    }
+
+    .arch-split-fixed {
+      width: var(--arch-split-fixed-width);
+      min-width: var(--arch-split-fixed-width);
+      grid-template-columns: 520px 1fr;
+      gap: 48px;
+    }
+
     @media (max-width: 1024px) {
       .arch-diagram {
         margin-bottom: 56px;
@@ -788,6 +845,10 @@
     @media (max-width: 800px) {
       .split-layout {
         grid-template-columns: 1fr;
+      }
+
+      .arch-split-fixed {
+        grid-template-columns: 520px 1fr;
       }
 
       nav {
@@ -1279,129 +1340,133 @@
     <p class="section-desc">整体架构分为四层，消息在微信客户端、桥接服务、OpenCode Server 与本地存储之间流转。</p>
 
     <!-- Flow Diagram -->
-    <div class="arch-diagram" style="margin-bottom: 80px;">
-      <!-- Top row: 微信 ←→ Bridge ←→ OpenCode -->
-      <div class="arch-top-row">
-        <!-- 微信 node -->
-        <div class="flow-node arch-wechat">
-          <div class="flow-icon">📱</div>
-          <div class="flow-label">微信客户端</div>
-          <div class="flow-sub">WeChat ilink API</div>
-        </div>
-
-        <!-- 微信 ↔ Bridge arrows -->
-        <div class="arch-bidir-h">
-          <div class="arch-arrow-row">
-            <div class="arch-arrowhead arch-arrowhead-left">◀</div>
-            <div class="arch-line arch-line-green"></div>
-            <div class="arch-arrow-label-top">消息 / 回复</div>
+    <div class="arch-diagram-wrap" style="margin-bottom: 80px;">
+      <div class="arch-diagram arch-diagram-fixed">
+        <!-- Top row: 微信 ←→ Bridge ←→ OpenCode -->
+        <div class="arch-top-row">
+          <!-- 微信 node -->
+          <div class="flow-node arch-wechat">
+            <div class="flow-icon">📱</div>
+            <div class="flow-label">微信客户端</div>
+            <div class="flow-sub">WeChat ilink API</div>
           </div>
-          <div class="arch-arrow-row" style="margin-top: 6px;">
-            <div class="arch-arrow-label-bot">消息 / 指令</div>
-            <div class="arch-line arch-line-blue"></div>
-            <div class="arch-arrowhead arch-arrowhead-right">▶</div>
+
+          <!-- 微信 ↔ Bridge arrows -->
+          <div class="arch-bidir-h">
+            <div class="arch-arrow-row">
+              <div class="arch-arrowhead arch-arrowhead-left">◀</div>
+              <div class="arch-line arch-line-green"></div>
+              <div class="arch-arrow-label-top">消息 / 回复</div>
+            </div>
+            <div class="arch-arrow-row" style="margin-top: 6px;">
+              <div class="arch-arrow-label-bot">消息 / 指令</div>
+              <div class="arch-line arch-line-blue"></div>
+              <div class="arch-arrowhead arch-arrowhead-right">▶</div>
+            </div>
+          </div>
+
+          <!-- Bridge node (center) -->
+          <div class="flow-node arch-bridge">
+            <div class="flow-icon">⚙️</div>
+            <div class="flow-label">Bridge Server</div>
+            <div class="flow-sub">Node.js / TypeScript</div>
+          </div>
+
+          <!-- Bridge ↔ OpenCode arrows -->
+          <div class="arch-bidir-h">
+            <div class="arch-arrow-row">
+              <div class="arch-arrow-label-top">API 请求</div>
+              <div class="arch-line arch-line-gold"></div>
+              <div class="arch-arrowhead arch-arrowhead-right" style="color: var(--gold);">▶</div>
+            </div>
+            <div class="arch-arrow-row" style="margin-top: 6px;">
+              <div class="arch-arrowhead arch-arrowhead-left" style="color: var(--gold);">◀</div>
+              <div class="arch-line arch-line-gold"></div>
+              <div class="arch-arrow-label-bot">OpenCode 回复</div>
+            </div>
+          </div>
+
+          <!-- OpenCode node -->
+          <div class="flow-node arch-opencode">
+            <div class="flow-icon">🤖</div>
+            <div class="flow-label">OpenCode Server</div>
+            <div class="flow-sub">localhost:4096</div>
           </div>
         </div>
 
-        <!-- Bridge node (center) -->
-        <div class="flow-node arch-bridge">
-          <div class="flow-icon">⚙️</div>
-          <div class="flow-label">Bridge Server</div>
-          <div class="flow-sub">Node.js / TypeScript</div>
+        <!-- Down arrow: Bridge → 本地存储 -->
+        <div class="arch-down-col">
+          <div class="arch-vline"></div>
+          <div class="arch-vline-label">读写</div>
+          <div class="arch-arrowhead-down">▼</div>
         </div>
 
-        <!-- Bridge ↔ OpenCode arrows -->
-        <div class="arch-bidir-h">
-          <div class="arch-arrow-row">
-            <div class="arch-arrow-label-top">API 请求</div>
-            <div class="arch-line arch-line-gold"></div>
-            <div class="arch-arrowhead arch-arrowhead-right" style="color: var(--gold);">▶</div>
+        <!-- Storage node -->
+        <div class="arch-bottom-row">
+          <div class="flow-node arch-storage">
+            <div class="flow-icon">💾</div>
+            <div class="flow-label">本地存储</div>
+            <div class="flow-sub">~/.WeChat-OpenCode-Bridge/</div>
           </div>
-          <div class="arch-arrow-row" style="margin-top: 6px;">
-            <div class="arch-arrowhead arch-arrowhead-left" style="color: var(--gold);">◀</div>
-            <div class="arch-line arch-line-gold"></div>
-            <div class="arch-arrow-label-bot">OpenCode 回复</div>
-          </div>
-        </div>
-
-        <!-- OpenCode node -->
-        <div class="flow-node arch-opencode">
-          <div class="flow-icon">🤖</div>
-          <div class="flow-label">OpenCode Server</div>
-          <div class="flow-sub">localhost:4096</div>
-        </div>
-      </div>
-
-      <!-- Down arrow: Bridge → 本地存储 -->
-      <div class="arch-down-col">
-        <div class="arch-vline"></div>
-        <div class="arch-vline-label">读写</div>
-        <div class="arch-arrowhead-down">▼</div>
-      </div>
-
-      <!-- Storage node -->
-      <div class="arch-bottom-row">
-        <div class="flow-node arch-storage">
-          <div class="flow-icon">💾</div>
-          <div class="flow-label">本地存储</div>
-          <div class="flow-sub">~/.WeChat-OpenCode-Bridge/</div>
         </div>
       </div>
     </div>
 
     <!-- Split: file tree + desc -->
-    <div class="split-layout">
-      <div class="file-tree">
-        <div class="ft-root">WeChat-OpenCode-Bridge/</div>
-        <div>├── <span class="ft-dir">src/</span></div>
-        <div>│ ├── <span class="ft-file">index.ts</span> <span class="ft-com"># CLI 入口</span></div>
-        <div>│ ├── <span class="ft-file">logger.ts</span> <span class="ft-com"># 结构化日志</span></div>
-        <div>│ ├── <span class="ft-file">constants.ts</span> <span class="ft-com"># 共享常量</span></div>
-        <div>│ ├── <span class="ft-file">config.ts</span> <span class="ft-com"># 配置加载/保存</span></div>
-        <div>│ ├── <span class="ft-dir">commands/</span></div>
-        <div>│ │ └── <span class="ft-file">router.ts</span> <span class="ft-com"># 指令路由</span></div>
-        <div>│ ├── <span class="ft-dir">opencode/</span></div>
-        <div>│ │ └── <span class="ft-file">client.ts</span> <span class="ft-com"># REST 客户端</span></div>
-        <div>│ ├── <span class="ft-dir">store/</span></div>
-        <div>│ │ ├── <span class="ft-file">account.ts</span> <span class="ft-com"># 账号持久化</span></div>
-        <div>│ │ └── <span class="ft-file">session.ts</span> <span class="ft-com"># 会话持久化</span></div>
-        <div>│ └── <span class="ft-dir">wechat/</span></div>
-        <div>│ ├── <span class="ft-file">api.ts</span> <span class="ft-com"># WeChat 客户端</span></div>
-        <div>│ ├── <span class="ft-file">login.ts</span> <span class="ft-com"># 二维码登录</span></div>
-        <div>│ └── <span class="ft-file">monitor.ts</span> <span class="ft-com"># 长轮询监听</span></div>
-        <div>├── <span class="ft-file">package.json</span></div>
-        <div>└── <span class="ft-file">tsconfig.json</span></div>
-      </div>
+    <div class="arch-split-wrap">
+      <div class="split-layout arch-split-fixed">
+        <div class="file-tree">
+          <div class="ft-root">WeChat-OpenCode-Bridge/</div>
+          <div>├── <span class="ft-dir">src/</span></div>
+          <div>│ ├── <span class="ft-file">index.ts</span> <span class="ft-com"># CLI 入口</span></div>
+          <div>│ ├── <span class="ft-file">logger.ts</span> <span class="ft-com"># 结构化日志</span></div>
+          <div>│ ├── <span class="ft-file">constants.ts</span> <span class="ft-com"># 共享常量</span></div>
+          <div>│ ├── <span class="ft-file">config.ts</span> <span class="ft-com"># 配置加载/保存</span></div>
+          <div>│ ├── <span class="ft-dir">commands/</span></div>
+          <div>│ │ └── <span class="ft-file">router.ts</span> <span class="ft-com"># 指令路由</span></div>
+          <div>│ ├── <span class="ft-dir">opencode/</span></div>
+          <div>│ │ └── <span class="ft-file">client.ts</span> <span class="ft-com"># REST 客户端</span></div>
+          <div>│ ├── <span class="ft-dir">store/</span></div>
+          <div>│ │ ├── <span class="ft-file">account.ts</span> <span class="ft-com"># 账号持久化</span></div>
+          <div>│ │ └── <span class="ft-file">session.ts</span> <span class="ft-com"># 会话持久化</span></div>
+          <div>│ └── <span class="ft-dir">wechat/</span></div>
+          <div>│ ├── <span class="ft-file">api.ts</span> <span class="ft-com"># WeChat 客户端</span></div>
+          <div>│ ├── <span class="ft-file">login.ts</span> <span class="ft-com"># 二维码登录</span></div>
+          <div>│ └── <span class="ft-file">monitor.ts</span> <span class="ft-com"># 长轮询监听</span></div>
+          <div>├── <span class="ft-file">package.json</span></div>
+          <div>└── <span class="ft-file">tsconfig.json</span></div>
+        </div>
 
-      <div>
-        <div style="margin-bottom: 32px;">
-          <div
-            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--green);">
-            🔌 wechat/ 模块</div>
-          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">通过 WeChat ilink API 实现二维码登录、消息接收与发送，内置
-            fetch 包装器提供重试与超时保护，长轮询监听器保持消息实时推送。</p>
-        </div>
-        <div style="margin-bottom: 32px;">
-          <div
-            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--gold);">
-            🤖 opencode/ 模块</div>
-          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">封装 OpenCode REST API
-            客户端，负责会话的创建、查询、删除与消息发送，对接本地运行的 <code
-              style="font-family: Fira Code; color: var(--text);">opencode serve</code> 服务。</p>
-        </div>
-        <div style="margin-bottom: 32px;">
-          <div
-            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--blue);">
-            💾 store/ 模块</div>
-          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">账号凭证与会话数据持久化，JSON
-            文件存储于用户主目录下，聊天历史本地备份，会话状态追踪（idle / processing）。</p>
-        </div>
         <div>
-          <div
-            style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text);">
-            ⚡ commands/ 路由</div>
-          <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">斜杠指令解析与分发，将微信消息中的 /help、/new、/switch
-            等指令路由到对应处理函数，支持模糊匹配与参数解析。</p>
+          <div style="margin-bottom: 32px;">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--green);">
+              🔌 wechat/ 模块</div>
+            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">通过 WeChat ilink API 实现二维码登录、消息接收与发送，内置
+              fetch 包装器提供重试与超时保护，长轮询监听器保持消息实时推送。</p>
+          </div>
+          <div style="margin-bottom: 32px;">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--gold);">
+              🤖 opencode/ 模块</div>
+            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">封装 OpenCode REST API
+              客户端，负责会话的创建、查询、删除与消息发送，对接本地运行的 <code
+                style="font-family: Fira Code; color: var(--text);">opencode serve</code> 服务。</p>
+          </div>
+          <div style="margin-bottom: 32px;">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--blue);">
+              💾 store/ 模块</div>
+            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">账号凭证与会话数据持久化，JSON
+              文件存储于用户主目录下，聊天历史本地备份，会话状态追踪（idle / processing）。</p>
+          </div>
+          <div>
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text);">
+              ⚡ commands/ 路由</div>
+            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.8;">斜杠指令解析与分发，将微信消息中的 /help、/new、/switch
+              等指令路由到对应处理函数，支持模糊匹配与参数解析。</p>
+          </div>
         </div>
       </div>
     </div>
