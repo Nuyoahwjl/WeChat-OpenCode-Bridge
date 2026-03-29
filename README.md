@@ -1,10 +1,8 @@
 <div align="center">
 
-
 <img src="./images/WeChat-OpenCode-Bridge.svg" alt="WeChat-OpenCode-Bridge" width="75%">
 <br>
 
-***将微信个人账号连接到 OpenCode AI 的桥接服务***
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24.14.1-green?logo=node.js&logoColor=white)
